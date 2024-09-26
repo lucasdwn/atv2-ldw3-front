@@ -24,7 +24,7 @@ export default function LoginPage() {
             <div className="flex-1 flex flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
                 <div className="mx-auto w-full max-w-sm lg:w-96">
                     <div className="flex items-center text-lg font-semibold text-primary mb-8">
-                        <ListChecks className="h-6 w-6 mr-2 text-[#8146FF]" />
+                        <ListChecks className="h-6 w-6 mr-2 text-violet-purple" />
                         List-tasks
                     </div>
                     <div>
@@ -86,7 +86,7 @@ export default function LoginPage() {
                             </div>
 
                             <div>
-                                <Button type="submit" className="w-full bg-[#8146FF] dark:text-gray-100">
+                                <Button type="submit" className="w-full bg-violet-purple hover:bg-violet-purple-hover  dark:text-gray-100">
                                     Entrar
                                 </Button>
                             </div>
@@ -94,7 +94,7 @@ export default function LoginPage() {
 
                         <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-100">
                             Não possui uma conta ainda?{' '}
-                            <Link href="/register" className="font-medium text-[#8146FF] hover:text-primary-dark">
+                            <Link href="/register" className="font-medium text-violet-purple hover:text-violet-purple-hover">
                                 Cadastre-se aqui.
                             </Link>
                         </p>
