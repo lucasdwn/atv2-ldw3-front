@@ -1,5 +1,5 @@
 import { ListChecks, List, Paintbrush, Share2 } from "lucide-react";
-import homeImage from "../assets/images/image-home.png";
+import homeImage from "../assets/images/image-home.webp";
 import Image from "next/image";
 import ThemeSwitch from "@/components/theme/themeSwitch";
 import { HeaderButtons } from "@/components/home/headerButtons";
@@ -41,11 +41,13 @@ export default function Home() {
             </div>
             <div className="md:w-1/2">
               <Image
-                src={homeImage.src}
+                src={homeImage}
                 alt="Task management illustration"
                 width={400}
                 height={400}
                 className="w-full h-auto"
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
           </div>

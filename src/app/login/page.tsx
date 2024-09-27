@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import loginImage from "../../assets/images/image-login.png";
+import loginImage from "../../assets/images/image-login.webp";
 import ThemeSwitch from '@/components/theme/themeSwitch';
 import PublicLayout from '../publicLayout';
 import { useAuth } from '@/context/authContext';
@@ -131,10 +131,11 @@ export default function LoginPage() {
                 <div className="hidden lg:flex justify-center items-center relative w-full h-screen p-5">
                     <Image
                         className="inset-0 h-full w-full object-cover rounded-lg justify-center"
-                        src={loginImage.src}
+                        src={loginImage}
                         alt="Login illustration"
                         width={1920}
                         height={1080}
+                        sizes="(max-width: 768px) 100vw, 50vw"
                     />
                 </div>
             </div>

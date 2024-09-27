@@ -12,6 +12,9 @@ const ThemeSwitch = () => {
             <Switch
                 checked={theme === 'dark'}
                 onCheckedChange={toggleTheme}
+                aria-label="Ativar/desativar modo escuro" 
+                aria-checked={theme === 'dark'} 
+                className="peer inline-flex h-5 w-9 cursor-pointer items-center rounded-full"
             />
         </div>
     );
