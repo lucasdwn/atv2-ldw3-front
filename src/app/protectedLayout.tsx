@@ -17,7 +17,7 @@ const ProtectedLayout = ({ children }: ProtectedLayoutProps) => {
 
     useEffect(() => {
         if (!loading && !isAuthenticated) {
-            router.push('/'); // Redireciona se não estiver autenticado
+            router.push('/');
         }
     }, [isAuthenticated, loading, router]);
 
@@ -26,7 +26,7 @@ const ProtectedLayout = ({ children }: ProtectedLayoutProps) => {
     };
 
     if (loading) {
-        return <Loading />; // Exibe loading enquanto valida
+        return <Loading />;
     }
 
     return (
