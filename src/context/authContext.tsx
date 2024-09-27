@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -15,7 +15,7 @@ const API_URL = 'http://localhost:3010';
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
-    const [isTokenValidated, setIsTokenValidated] = useState<boolean>(false);
+    const checkCalled = useRef<boolean>(false);
     const router = useRouter();
 
     const refreshAccessToken = async (refreshToken: string) => {
@@ -48,35 +48,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
         }
 
-        if (!isTokenValidated) {
-            try {
-                const response = await fetch(`${API_URL}/auth/validate-token`, {
-                    method: 'GET',
-                    headers: { Authorization: `${token}` },
-                });
+        try {
+            const response = await fetch(`${API_URL}/auth/validate-token`, {
+                method: 'GET',
+                headers: { Authorization: `${token}` },
+            });
 
-                if (response.ok) {
-                    setIsAuthenticated(true);
+            if (response.ok) {
+                setIsAuthenticated(true);
+            } else {
+                if (refreshToken) {
+                    const refreshed = await refreshAccessToken(refreshToken);
+                    setIsAuthenticated(refreshed);
                 } else {
-                    if (refreshToken) {
-                        const refreshed = await refreshAccessToken(refreshToken);
-                        if (refreshed) {
-                            setIsAuthenticated(true);
-                        } else {
-                            setIsAuthenticated(false);
-                        }
-                    } else {
-                        setIsAuthenticated(false);
-                    }
+                    setIsAuthenticated(false);
                 }
-            } catch (error) {
-                console.error('Error validating token:', error);
-                setIsAuthenticated(false);
-            } finally {
-                setIsTokenValidated(true);
-                setLoading(false);
             }
-        } else {
+        } catch (error) {
+            console.error('Error validating token:', error);
+            setIsAuthenticated(false);
+        } finally {
             setLoading(false);
         }
     };
@@ -86,12 +77,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         setIsAuthenticated(false);
-        setIsTokenValidated(false);
-        router.push('/')
+        router.push('/');
     };
 
     useEffect(() => {
-        checkAuthentication();
+
+        if (!checkCalled.current) {
+            checkCalled.current = true;
+            checkAuthentication();
+        }
     }, []);
 
     return (
