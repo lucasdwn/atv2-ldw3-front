@@ -29,9 +29,10 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                         size="icon"
                         className="absolute top-4 left-4 z-10 flex lg:hidden"
                         onClick={toggleNavbar}
-                        aria-label={isOpen ? "Close menu" : "Open menu"}
+                        aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
+                        style={{ minWidth: '44px', minHeight: '44px' }}
                     >
-                        {isOpen ? <CircleChevronLeft /> : <CircleChevronRight />}
+                        {isOpen ? <CircleChevronLeft aria-hidden="true" /> : <CircleChevronRight aria-hidden="true" />}
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent side="right" align="center" className="ml-2">
@@ -43,7 +44,7 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                     absolute top-0 left-0 h-screen bg-white dark:bg-[#1E1E1E] transition-all duration-300 ease-in-out 
                     ${isOpen ? ' w-full lg:w-64 z-20' : 'w-0 lg:w-16'} 
                 `}>
-                <div className="flex flex-col h-full justify-between p-4">
+                <div className={`flex flex-col h-full justify-between p-4  lg:flex ${isOpen ? 'flex' : 'hidden lg:flex'}`}>
                     <div>
                         <div className={`flex items-center justify-between mb-2 ${isOpen ? 'flex-row' : 'flex-col'}`}>
                             <div className="flex items-center">
@@ -55,7 +56,7 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className={`w-auto items-center justify-center align-center ${isOpen ? '' : 'mt-2 hidden lg:flex'}`}
+                                        className={`w-auto items-center justify-center align-center hidden lg:flex ${isOpen ? 'flex' : 'mt-2 hidden lg:flex'}`}
                                         onClick={toggleNavbar}
                                         aria-label={isOpen ? "Close menu" : "Open menu"}
                                     >
@@ -73,7 +74,11 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                         <nav className={`${isOpen ? 'space-y-2' : 'lg:flex lg:flex-col lg:items-center lg:justify-between lg:mb-8'}`}>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button variant="ghost" className={`w-full justify-start ${isOpen ? 'w-full justify-start' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
+                                    <Button
+                                        variant="ghost"
+                                        className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}
+                                        style={{ minWidth: '44px', minHeight: '44px' }}
+                                    >
                                         <CircleUserRound className="mr-2" />
                                         {isOpen && <span>Perfil</span>}
                                     </Button>
@@ -86,7 +91,7 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                             </Tooltip>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button variant="ghost" className={`w-full justify-start ${isOpen ? 'w-full justify-start' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
+                                    <Button variant="ghost" className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
                                         <List className="mr-2" />
                                         {isOpen && <span>Minhas listas</span>}
                                     </Button>
@@ -99,7 +104,7 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                             </Tooltip>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button variant="ghost" className={`w-full justify-start ${isOpen ? 'w-full justify-start' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
+                                    <Button variant="ghost" className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
                                         <Share2 className="mr-2" />
                                         {isOpen && <span>Listas compartilhadas</span>}
                                     </Button>
@@ -115,7 +120,7 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                     <nav className={`${isOpen ? 'space-y-2' : 'lg:flex lg:flex-col lg:items-center lg:justify-between lg:mb-8'}`}>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button variant="ghost" className={`w-full ${isOpen ? 'w-full justify-start' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
+                                <Button variant="ghost" className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
                                     <LogOut className={`w-auto ${isOpen ? 'mr-2' : ''}`} onClick={logout} />
                                     {isOpen ? <span>Sair</span> : null}
                                 </Button>
