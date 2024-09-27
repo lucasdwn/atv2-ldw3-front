@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/themeProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/context/authContext";
 
 
 export const metadata: Metadata = {
@@ -25,9 +26,11 @@ export default function RootLayout({
         className={`antialiased`}
       >
         <ThemeProvider>
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              {children}
+            </TooltipProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

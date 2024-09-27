@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { CircleChevronLeft, CircleChevronRight, ListCheck, CircleUserRound, List, Share2, LogOut } from 'lucide-react'
 import ThemeSwitch from './theme/themeSwitch'
+import { useAuth } from '@/context/authContext'
 
 export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: boolean) => void }) {
     const [isOpen, setIsOpen] = useState(false)
+    const { logout } = useAuth();
 
     const toggleNavbar = () => {
         setIsOpen(!isOpen);
@@ -114,11 +116,11 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button variant="ghost" className={`w-full ${isOpen ? 'w-full justify-start' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
-                                    <LogOut className={`w-auto ${isOpen ? 'mr-2' : ''}`} />
+                                    <LogOut className={`w-auto ${isOpen ? 'mr-2' : ''}`} onClick={logout} />
                                     {isOpen ? <span>Sair</span> : null}
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent side="right" align="center" className="ml-2">
                                 <span>Sair</span>
                             </TooltipContent>
                         </Tooltip>
