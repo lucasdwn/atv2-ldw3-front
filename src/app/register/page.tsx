@@ -19,7 +19,7 @@ export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
-    const { checkAuthentication } = useAuth();
+    const { register } = useAuth();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -34,31 +34,10 @@ export default function RegisterPage() {
         }
 
         try {
-            const response = await fetch('http://localhost:3010/usuario', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ nome, email, senha: password }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Erro ao registrar usuário.');
-            }
-
-            const data = await response.json();
-
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('refreshToken', data.refreshToken);
-            localStorage.setItem('usuario', JSON.stringify(data.usuario));
-
-            await checkAuthentication();
-
-            router.push('/lists');
-
-        } catch (err: any) {
-            setError(err.message);
+            await register(nome, email, password);
+            router.push('/lists')
+        } catch (error: any) {
+            setError(error.message);
         }
     };
 

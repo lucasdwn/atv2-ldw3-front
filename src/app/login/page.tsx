@@ -18,7 +18,7 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
-    const { checkAuthentication } = useAuth();
+    const { login } = useAuth();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -26,34 +26,14 @@ export default function LoginPage() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-
         try {
-            const response = await fetch('http://localhost:3010/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, senha: password }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao fazer login. Verifique suas credenciais.');
-            }
-
-            const data = await response.json();
-
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('refreshToken', data.refreshToken);
-            localStorage.setItem('usuario', JSON.stringify(data.usuario));
-
-            await checkAuthentication();
-
-            router.push('/lists');
-
-        } catch (err: any) {
-            setError(err.message);
+            await login(email, password);
+            router.push('/lists')
+        } catch (error: any) {
+            setError(error.message);
         }
     };
+
 
     return (
         <PublicLayout>

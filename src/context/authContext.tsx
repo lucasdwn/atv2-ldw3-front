@@ -7,10 +7,12 @@ interface AuthContextType {
     loading: boolean;
     checkAuthentication: () => void;
     logout: () => void;
+    login: (email: string, password: string) => Promise<void>;
+    register: (nome: string, email: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const API_URL = 'http://localhost:3010';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3010';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -80,8 +82,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         router.push('/');
     };
 
-    useEffect(() => {
+    const login = async (email: string, password: string): Promise<void> => {
+        try {
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, senha: password }),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erro ao fazer login.');
+            }
+            const { token, refreshToken, usuario } = await response.json();
+            localStorage.setItem('token', token);
+            localStorage.setItem('usuario', JSON.stringify(usuario));
+            localStorage.setItem('refreshToken', refreshToken);
+            setIsAuthenticated(true);
+        } catch (error) {
+            console.error('Error logging in:', error);
+            throw error;
+        }
+    };
 
+    const register = async (nome: string, email: string, password: string): Promise<void> => {
+        try {
+            const response = await fetch(`${API_URL}/usuario/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, email, senha: password }),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erro ao registrar usuário.');
+            }
+            const { token, refreshToken, usuario } = await response.json();
+            localStorage.setItem('token', token);
+            localStorage.setItem('usuario', JSON.stringify(usuario));
+            localStorage.setItem('refreshToken', refreshToken);
+            setIsAuthenticated(true);
+        } catch (error) {
+            console.error('Error registering:', error);
+            throw error;
+        }
+    };
+
+    useEffect(() => {
         if (!checkCalled.current) {
             checkCalled.current = true;
             checkAuthentication();
@@ -89,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, loading, checkAuthentication, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, loading, checkAuthentication, logout, login, register }}>
             {children}
         </AuthContext.Provider>
     );
@@ -98,7 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
+        throw new Error('useAuthContext must be used within an AuthProvider');
     }
     return context;
 };
