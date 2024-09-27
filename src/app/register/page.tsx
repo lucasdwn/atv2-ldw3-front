@@ -8,17 +8,62 @@ import { Button } from "@/components/ui/button";
 import registerImage from "../../assets/images/image-register.png";
 import ThemeSwitch from '@/components/theme/themeSwitch';
 import PublicLayout from '../publicLayout';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/authContext';
 
 export default function RegisterPage() {
+    const [nome, setNome] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const router = useRouter();
+    const { checkAuthentication } = useAuth();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
 
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (password !== confirmPassword) {
+            setError('As senhas não correspondem.');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:3010/usuario', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ nome, email, senha: password }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erro ao registrar usuário.');
+            }
+
+            const data = await response.json();
+
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('refreshToken', data.refreshToken);
+            localStorage.setItem('usuario', JSON.stringify(data.usuario));
+
+            await checkAuthentication();
+
+            router.push('/lists');
+
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
     return (
         <PublicLayout>
-
             <div className="flex min-h-screen relative">
                 <div className="absolute top-4 left-4 z-50">
                     <ThemeSwitch />
@@ -41,7 +86,8 @@ export default function RegisterPage() {
                             </p>
                         </div>
                         <div className="mt-8">
-                            <form className="space-y-6" action="#" method="POST">
+                            <form className="space-y-6" onSubmit={handleRegister}>
+                                {error && <p className="text-red-600">{error}</p>}
                                 <div>
                                     <label htmlFor="nome" className="block text-sm font-medium text-gray-700 dark:text-gray-100">
                                         Nome
@@ -50,10 +96,12 @@ export default function RegisterPage() {
                                         <Input
                                             id="nome"
                                             name="nome"
-                                            type="texta"
+                                            type="text"
                                             className="dark:border-gray-100 dark:placeholder:text-gray-200"
                                             required
                                             placeholder="Insira seu nome..."
+                                            value={nome}
+                                            onChange={(e) => setNome(e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -70,6 +118,8 @@ export default function RegisterPage() {
                                             className="dark:border-gray-100 dark:placeholder:text-gray-200"
                                             required
                                             placeholder="Insira seu e-mail..."
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -87,12 +137,9 @@ export default function RegisterPage() {
                                                 placeholder="Insira sua senha..."
                                                 autoComplete="current-password"
                                                 required
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
                                             />
-                                            <div
-                                                className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
-                                                onClick={togglePasswordVisibility}
-                                            >
-                                            </div>
                                         </div>
                                     </div>
                                     <div>
@@ -105,9 +152,11 @@ export default function RegisterPage() {
                                                 name="confirm-password"
                                                 type={showPassword ? 'text' : 'password'}
                                                 className="dark:border-gray-100 dark:placeholder:text-gray-200 pr-10"
-                                                placeholder="confirme sua senha..."
+                                                placeholder="Confirme sua senha..."
                                                 autoComplete="current-password"
                                                 required
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
                                             />
                                             <div
                                                 className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
@@ -141,7 +190,7 @@ export default function RegisterPage() {
                     <Image
                         className="inset-0 h-full w-full object-cover rounded-lg justify-center"
                         src={registerImage.src}
-                        alt="Login illustration"
+                        alt="Register illustration"
                         width={1920}
                         height={1080}
                     />
