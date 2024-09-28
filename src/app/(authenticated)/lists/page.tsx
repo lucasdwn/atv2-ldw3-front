@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ListPlus } from "lucide-react";
-import ProtectedLayout from "../protectedLayout";
 
 export default function HomePage() {
     return (
-        <ProtectedLayout>
+        <>
             <header>
                 <h1 className="text-4xl font-bold mb-8">Suas listas</h1>
             </header>
@@ -18,6 +17,6 @@ export default function HomePage() {
                     </Button>
                 </div>
             </main>
-        </ProtectedLayout>
+        </>
     );
 }

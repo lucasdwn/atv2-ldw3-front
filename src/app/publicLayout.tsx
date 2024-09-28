@@ -23,7 +23,12 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
         return <Loading />;
     }
 
-    return <>{children}</>;
+    return (
+        <>
+            {isAuthenticated && null}
+            {!isAuthenticated && children}
+        </>
+    )
 };
 
 export default PublicLayout;

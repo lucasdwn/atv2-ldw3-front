@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import ProtectedLayout from '../protectedLayout';
 import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import { apiService } from '@/services/apiService';
@@ -103,7 +102,7 @@ export default function ProfilePage() {
     }, []);
 
     return (
-        <ProtectedLayout>
+        <>
             <header>
                 <h1 className="text-4xl font-bold mb-8">Perfil</h1>
             </header>
@@ -250,6 +249,6 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </main>
-        </ProtectedLayout>
+        </>
     );
 }
