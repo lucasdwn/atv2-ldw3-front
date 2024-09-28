@@ -1,4 +1,4 @@
-const API_URL = process.env.API_URL || 'http://192.168.1.36:3010';
+const API_URL = process.env.NEXT_PUBLIC_API_URL_PRODUCAO;
 
 export const apiService = {
     getToken: (): string | null => localStorage.getItem('token'),
