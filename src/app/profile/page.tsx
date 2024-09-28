@@ -28,6 +28,7 @@ export default function ProfilePage() {
     });
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
     const togglePasswordVisibility = () => {
@@ -41,7 +42,15 @@ export default function ProfilePage() {
         setConfirmPassword('');
     };
 
-    const handleSave = async () => {
+
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (password !== confirmPassword) {
+            setError('As senhas não correspondem.');
+            return;
+        }
+
         const updatedUser = {
             nome: userData.nome,
             email: userData.email,
@@ -52,16 +61,19 @@ export default function ProfilePage() {
             await apiService.makeRequest('/usuario/update', {
                 method: 'PUT',
                 body: JSON.stringify(updatedUser),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             });
             setIsEditing(false);
+            setError('');
             setPassword('');
             setConfirmPassword('');
             fetchUserData();
-        } catch (error) {
-            console.error('Erro ao atualizar informações do usuário:', error);
+        } catch (error: any) {
+            setError(error.message);
         }
     };
-
     const fetchUserData = async () => {
         try {
             const response = await apiService.makeRequest('/usuario/currentUser');
@@ -73,10 +85,18 @@ export default function ProfilePage() {
                     atualizadoEm: response.atualizadoEm ? new Date(response.atualizadoEm) : undefined
                 });
             }
-        } catch (error) {
-            console.error('Erro ao buscar informações do usuário:', error);
+        } catch (error: any) {
+            setError(error.message);
         }
     };
+
+    function getInitials(name: string): string {
+        return name
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase())
+            .join('');
+    }
+
 
     useEffect(() => {
         fetchUserData();
@@ -101,15 +121,15 @@ export default function ProfilePage() {
                                 />
                                 <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
                                     <Avatar className="w-24 h-24 border-4 border-white">
-                                        <AvatarImage src="https://github.com/lucasdwn.png" alt="Profile picture" />
-                                        <AvatarFallback>LU</AvatarFallback>
+                                        <AvatarImage src="" alt="Profile picture" />
+                                        <AvatarFallback>{getInitials(userData.nome)}</AvatarFallback>
                                     </Avatar>
                                 </div>
                             </CardHeader>
 
                             <CardContent className="pt-16">
                                 <form className="space-y-4">
-
+                                    {error && <p className="text-red-600">{error}</p>}
                                     <div>
                                         <Label htmlFor="name">Nome</Label>
                                         <Input

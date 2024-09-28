@@ -10,7 +10,7 @@ export const apiService = {
         const headers = {
             ...options.headers,
             'Content-Type': 'application/json',
-            Authorization: `${token}`,
+            Authorization: token ? `${token}` : '',
         };
 
         try {
@@ -20,12 +20,15 @@ export const apiService = {
             });
 
             if (response.status === 401) {
-
                 const newTokens = await this.refreshToken();
                 if (newTokens) {
-
                     return this.makeRequest(endpoint, options);
                 }
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erro ao fazer requisição');
             }
 
             return response.json();
@@ -60,7 +63,8 @@ export const apiService = {
 
                 return data;
             } else {
-                console.error('Erro ao atualizar o token');
+                const errorData = await response.json();
+                console.error('Erro ao atualizar o token:', errorData.message || 'Erro desconhecido');
                 return null;
             }
         } catch (err) {
