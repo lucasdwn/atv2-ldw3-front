@@ -12,15 +12,31 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
     const [isOpen, setIsOpen] = useState(false)
     const { logout } = useAuth();
     const router = useRouter();
+    const { innerWidth: width, innerHeight: height } = window;
 
     const toggleNavbar = () => {
-        setIsOpen(!isOpen);
-        onNavbarToggle(!isOpen);
+        const newIsOpen = !isOpen;
+        setIsOpen(newIsOpen);
+        onNavbarToggle(newIsOpen);
+        localStorage.setItem('isNavbarOpen', JSON.stringify(newIsOpen));
     };
 
+    const routePush = (route: string) => {
+        router.push(route);
+        if (innerWidth < 1024) {
+            toggleNavbar();
+        }
+    }
+
     useEffect(() => {
-        onNavbarToggle(isOpen);
-    }, [isOpen, onNavbarToggle]);
+        const storedIsOpen = localStorage.getItem('isNavbarOpen');
+
+        if (storedIsOpen !== null) {
+            const parsedIsOpen = (innerWidth < 1024 ? false : JSON.parse(storedIsOpen));
+            setIsOpen(parsedIsOpen);
+            onNavbarToggle(parsedIsOpen);
+        }
+    }, []);
 
     return (
         <>
@@ -87,7 +103,7 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                                         variant="ghost"
                                         className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}
                                         style={{ minWidth: '44px', minHeight: '44px' }}
-                                        onClick={() => router.push('/profile')}
+                                        onClick={() => routePush('/profile')}
                                     >
                                         <CircleUserRound className="mr-2" />
                                         {isOpen && <span>Perfil</span>}
@@ -104,7 +120,7 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                                     <Button
                                         variant="ghost"
                                         className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}
-                                        onClick={() => router.push('/lists')}
+                                        onClick={() => routePush('/lists')}
                                     >
                                         <List className="mr-2" />
                                         {isOpen && <span>Minhas listas</span>}
@@ -135,8 +151,8 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                     <nav className={`${isOpen ? 'space-y-2' : 'lg:flex lg:flex-col lg:items-center lg:justify-between lg:mb-8'}`}>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button variant="ghost" className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
-                                    <LogOut className={`w-auto ${isOpen ? 'mr-2' : ''}`} onClick={logout} />
+                                <Button onClick={logout} variant="ghost" className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
+                                    <LogOut className={`w-auto ${isOpen ? 'mr-2' : ''}`} />
                                     {isOpen ? <span>Sair</span> : null}
                                 </Button>
                             </TooltipTrigger>
