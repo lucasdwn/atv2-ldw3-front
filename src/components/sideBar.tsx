@@ -6,10 +6,12 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/comp
 import { CircleChevronLeft, CircleChevronRight, ListCheck, CircleUserRound, List, Share2, LogOut } from 'lucide-react'
 import ThemeSwitch from './theme/themeSwitch'
 import { useAuth } from '@/context/authContext'
+import { useRouter } from 'next/navigation'
 
 export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: boolean) => void }) {
     const [isOpen, setIsOpen] = useState(false)
     const { logout } = useAuth();
+    const router = useRouter();
 
     const toggleNavbar = () => {
         setIsOpen(!isOpen);
@@ -22,26 +24,33 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
 
     return (
         <>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-4 left-4 z-10 flex lg:hidden"
-                        onClick={toggleNavbar}
-                        aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
-                        style={{ minWidth: '44px', minHeight: '44px' }}
-                    >
-                        {isOpen ? <CircleChevronLeft aria-hidden="true" /> : <CircleChevronRight aria-hidden="true" />}
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right" align="center" className="ml-2">
-                    <span>{isOpen ? 'Fechar' : 'Abrir'}</span>
-                </TooltipContent>
-            </Tooltip>
+
+            <div className='fixed top-0  z-10 flex bg-gray-100  dark:bg-[#1E1E1E] w-full justify-start lg:hidden shadow-xl'>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className=" "
+                            onClick={toggleNavbar}
+                            aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
+                            style={{ minWidth: '44px', minHeight: '44px' }}
+                        >
+                            {isOpen ? <CircleChevronLeft aria-hidden="true" /> : <CircleChevronRight aria-hidden="true" />}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" align="center" className="ml-2">
+                        <span>{isOpen ? 'Fechar' : 'Abrir'}</span>
+                    </TooltipContent>
+                </Tooltip>
+                <div className="flex items-center ml-2">
+                    <ListCheck className={`text-violet-600 w-8 h-8 mr-1 lg:flex`} />
+                    <span className="text-xl font-bold">List-tasks</span>
+                </div>
+            </div>
 
             <aside className={` 
-                    absolute top-0 left-0 h-screen bg-white dark:bg-[#1E1E1E] transition-all duration-300 ease-in-out 
+                    fixed top-0 left-0 h-screen bg-white dark:bg-[#1E1E1E] transition-all duration-300 ease-in-out 
                     ${isOpen ? ' w-full lg:w-64 z-20' : 'w-0 lg:w-16'} 
                 `}>
                 <div className={`flex flex-col h-full justify-between p-4  lg:flex ${isOpen ? 'flex' : 'hidden lg:flex'}`}>
@@ -78,6 +87,7 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                                         variant="ghost"
                                         className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}
                                         style={{ minWidth: '44px', minHeight: '44px' }}
+                                        onClick={() => router.push('/profile')}
                                     >
                                         <CircleUserRound className="mr-2" />
                                         {isOpen && <span>Perfil</span>}
@@ -91,9 +101,14 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                             </Tooltip>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button variant="ghost" className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
+                                    <Button
+                                        variant="ghost"
+                                        className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}
+                                        onClick={() => router.push('/lists')}
+                                    >
                                         <List className="mr-2" />
                                         {isOpen && <span>Minhas listas</span>}
+
                                     </Button>
                                 </TooltipTrigger>
                                 {!isOpen &&
