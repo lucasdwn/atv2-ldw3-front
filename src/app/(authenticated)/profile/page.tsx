@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import { apiService } from '@/services/apiService';
+import Loading from '@/components/loading';
 
 interface User {
     nome: string;
@@ -35,7 +36,9 @@ export default function ProfilePage() {
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [profileImage, setProfileImage] = useState<File | null>(null);
-    const [initialImage, setInitialImage] = useState<string | undefined>(undefined);
+
+    const [isFetching, setIsFetching] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -64,6 +67,7 @@ export default function ProfilePage() {
         if (password) formData.append('senha', password);
         if (profileImage) formData.append('image', profileImage);
 
+        setIsSaving(true);
         try {
             await apiService.makeRequest('/usuario/update', {
                 method: 'PUT',
@@ -76,10 +80,13 @@ export default function ProfilePage() {
             fetchUserData();
         } catch (error: any) {
             setError(error.message);
+        } finally {
+            setIsSaving(false);
         }
     };
 
     const fetchUserData = async () => {
+        setIsFetching(true);
         try {
             const response = await apiService.makeRequest('/usuario/currentUser');
             if (response) {
@@ -92,10 +99,11 @@ export default function ProfilePage() {
                 };
                 setUserData(userData);
                 setOriginalUserData(userData);
-                setInitialImage(response.profileImage);
             }
         } catch (error: any) {
             setError(error.message);
+        } finally {
+            setIsFetching(false);
         }
     };
 
@@ -117,13 +125,19 @@ export default function ProfilePage() {
         fetchUserData();
     }, []);
 
+    if (isFetching) {
+        return (
+            <Loading />
+        );
+    }
+
     return (
         <>
             <header>
                 <h1 className="text-4xl font-bold mb-8">Perfil</h1>
             </header>
             <main>
-                <div className="min-h-screen bg-gray-100 dark:bg-black  px-4 sm:px-6 lg:px-8">
+                <div className="min-h-screen bg-gray-100 dark:bg-black px-4 sm:px-6 lg:px-8">
                     <div className="max-w-3xl mx-auto">
                         <Card>
                             <CardHeader className="relative h-48 bg-gray-200">
@@ -140,12 +154,11 @@ export default function ProfilePage() {
                                             {profileImage && isEditing ? (
                                                 <AvatarImage src={URL.createObjectURL(profileImage)} alt="Profile picture" />
                                             ) : (
-                                                <AvatarImage src={initialImage} alt="Profile picture" />
-
+                                                <AvatarImage src={userData.profileImage} alt="Profile picture" />
                                             )}
                                             <AvatarFallback>{getInitials(userData.nome)}</AvatarFallback>
                                         </Avatar>
-                                        {isEditing && <span className="absolute inset-0  items-center justify-center rounded-full text-white text-opacity-0 flex bg-black bg-opacity-25 hover:text-opacity-100  hover:bg-black hover:bg-opacity-50 text-sm">Upload</span>}
+                                        {isEditing && <span className="absolute inset-0 items-center justify-center rounded-full text-white text-opacity-0 flex bg-black bg-opacity-25 hover:text-opacity-100 hover:bg-black hover:bg-opacity-50 text-sm">Upload</span>}
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -181,6 +194,7 @@ export default function ProfilePage() {
                                             disabled={!isEditing}
                                         />
                                     </div>
+
                                     {isEditing ? (
                                         <>
                                             <div>
@@ -265,20 +279,20 @@ export default function ProfilePage() {
                                 </form>
                             </CardContent>
 
-                            <CardFooter className="flex justify-between">
+                            <CardFooter className="flex justify-end space-x-2">
                                 {isEditing ? (
                                     <>
-                                        <Button variant="outline" onClick={handleCancel}>
-                                            Cancelar
-                                        </Button>
-                                        <Button onClick={handleSave}>
-                                            Salvar
+                                        <Button variant="outline" onClick={handleCancel}>Cancelar</Button>
+                                        <Button
+                                            type="submit"
+                                            disabled={isSaving}
+                                            onClick={handleSave}
+                                        >
+                                            {isSaving ? 'Salvando...' : 'Salvar'}
                                         </Button>
                                     </>
                                 ) : (
-                                    <Button onClick={handleEdit}>
-                                        Editar
-                                    </Button>
+                                    <Button onClick={handleEdit}>Editar</Button>
                                 )}
                             </CardFooter>
                         </Card>
