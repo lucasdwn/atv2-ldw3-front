@@ -9,14 +9,18 @@ export const apiService = {
 
         const headers = {
             ...options.headers,
-            'Content-Type': 'application/json',
             Authorization: token ? `${token}` : '',
         };
+
+        const isFormData = options.body instanceof FormData;
 
         try {
             const response = await fetch(`${API_URL}${endpoint}`, {
                 ...options,
-                headers,
+                headers: {
+                    ...headers,
+                    ...(isFormData ? {} : { 'Content-Type': 'application/json' }) 
+                },
             });
 
             if (response.status === 401) {

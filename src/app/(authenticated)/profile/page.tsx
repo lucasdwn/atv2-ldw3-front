@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
@@ -13,6 +13,7 @@ import { apiService } from '@/services/apiService';
 interface User {
     nome: string;
     email: string;
+    profileImage?: string;
     senha?: string;
     criadoEm?: Date;
     atualizadoEm?: Date;
@@ -25,22 +26,30 @@ export default function ProfilePage() {
         email: '',
         senha: '',
     });
+    const [originalUserData, setOriginalUserData] = useState<User>({
+        nome: '',
+        email: '',
+        senha: '',
+    }); 
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [profileImage, setProfileImage] = useState<File | null>(null);
+    const [initialImage, setInitialImage] = useState<string | undefined>(undefined); 
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
 
     const handleEdit = () => setIsEditing(true);
+
     const handleCancel = () => {
         setIsEditing(false);
         setPassword('');
         setConfirmPassword('');
+        setUserData(originalUserData); 
     };
-
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -50,19 +59,16 @@ export default function ProfilePage() {
             return;
         }
 
-        const updatedUser = {
-            nome: userData.nome,
-            email: userData.email,
-            senha: password || undefined,
-        };
+        const formData = new FormData();
+        formData.append('nome', userData.nome);
+        formData.append('email', userData.email);
+        if (password) formData.append('senha', password);
+        if (profileImage) formData.append('profileImage', profileImage);
 
         try {
             await apiService.makeRequest('/usuario/update', {
                 method: 'PUT',
-                body: JSON.stringify(updatedUser),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                body: formData
             });
             setIsEditing(false);
             setError('');
@@ -73,16 +79,21 @@ export default function ProfilePage() {
             setError(error.message);
         }
     };
+
     const fetchUserData = async () => {
         try {
             const response = await apiService.makeRequest('/usuario/currentUser');
             if (response) {
-                setUserData({
+                const userData = {
                     nome: response.nome,
                     email: response.email,
+                    profileImage: response.profileImage,
                     criadoEm: response.criadoEm ? new Date(response.criadoEm) : undefined,
                     atualizadoEm: response.atualizadoEm ? new Date(response.atualizadoEm) : undefined
-                });
+                };
+                setUserData(userData);
+                setOriginalUserData(userData);
+                setInitialImage(response.profileImage); 
             }
         } catch (error: any) {
             setError(error.message);
@@ -96,6 +107,12 @@ export default function ProfilePage() {
             .join('');
     }
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setProfileImage(file);
+        }
+    };
 
     useEffect(() => {
         fetchUserData();
@@ -119,10 +136,25 @@ export default function ProfilePage() {
                                     priority
                                 />
                                 <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
-                                    <Avatar className="w-24 h-24 border-4 border-white">
-                                        <AvatarImage src="" alt="Profile picture" />
-                                        <AvatarFallback>{getInitials(userData.nome)}</AvatarFallback>
-                                    </Avatar>
+                                    <label className={`cursor-pointer relative ${isEditing ? 'hover:bg-gray-300 ' : ''}`}>
+                                        <Avatar className="w-24 h-24 border-4 border-white">
+                                            {profileImage && isEditing ? (
+                                                <AvatarImage src={URL.createObjectURL(profileImage)} alt="Profile picture" />
+                                            ) : (
+                                                <AvatarImage src={initialImage} alt="Profile picture" />
+
+                                            )}
+                                            <AvatarFallback>{getInitials(userData.nome)}</AvatarFallback>
+                                        </Avatar>
+                                        {isEditing && <span className="absolute inset-0  items-center justify-center rounded-full text-white text-opacity-0 flex bg-black bg-opacity-25 hover:text-opacity-100  hover:bg-black hover:bg-opacity-50 text-sm">Upload</span>}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            className="hidden"
+                                            disabled={!isEditing}
+                                        />
+                                    </label>
                                 </div>
                             </CardHeader>
 
@@ -209,40 +241,45 @@ export default function ProfilePage() {
                                                 </div>
                                             </div>
                                         </>
-                                    ) :
-                                        (
-
-                                            <div className='flex w-full gap-2'>
-                                                <div className='w-full'>
-                                                    <Label htmlFor="criadoem">Data de criação</Label>
-                                                    <Input
-                                                        id="criadoem"
-                                                        type="date"
-                                                        value={userData.criadoEm ? userData.criadoEm.toISOString().split('T')[0] : ''}
-                                                        disabled
-                                                    />
-                                                </div>
-                                                <div className='w-full'>
-                                                    <Label htmlFor="atualizadoEm">Ultima atualização</Label>
-                                                    <Input
-                                                        id="atualizadoEm"
-                                                        type="date"
-                                                        value={userData.atualizadoEm ? userData.atualizadoEm.toISOString().split('T')[0] : ''}
-                                                        disabled
-                                                    />
-                                                </div>
+                                    ) : (
+                                        <div className='flex w-full gap-2'>
+                                            <div className='w-full'>
+                                                <Label htmlFor="criadoem">Data de criação</Label>
+                                                <Input
+                                                    id="criadoem"
+                                                    type="date"
+                                                    value={userData.criadoEm ? userData.criadoEm.toISOString().split('T')[0] : ''}
+                                                    disabled
+                                                />
                                             </div>
-                                        )}
+                                            <div className='w-full'>
+                                                <Label htmlFor="atualizadoem">Data de atualização</Label>
+                                                <Input
+                                                    id="atualizadoem"
+                                                    type="date"
+                                                    value={userData.atualizadoEm ? userData.atualizadoEm.toISOString().split('T')[0] : ''}
+                                                    disabled
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </form>
                             </CardContent>
-                            <CardFooter className="flex justify-end space-x-2">
-                                {!isEditing ? (
-                                    <Button onClick={handleEdit}>Editar</Button>
-                                ) : (
+
+                            <CardFooter className="flex justify-between">
+                                {isEditing ? (
                                     <>
-                                        <Button variant="outline" onClick={handleCancel}>Cancelar</Button>
-                                        <Button onClick={handleSave}>Salvar</Button>
+                                        <Button variant="outline" onClick={handleCancel}>
+                                            Cancelar
+                                        </Button>
+                                        <Button onClick={handleSave}>
+                                            Salvar
+                                        </Button>
                                     </>
+                                ) : (
+                                    <Button onClick={handleEdit}>
+                                        Editar
+                                    </Button>
                                 )}
                             </CardFooter>
                         </Card>
