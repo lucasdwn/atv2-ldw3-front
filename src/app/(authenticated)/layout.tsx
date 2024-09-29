@@ -1,8 +1,6 @@
-// app/(authenticated)/layout.tsx - Arquivo layout para rotas autenticadas
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/authContext';
 import Navbar from '@/components/sideBar';
 import { useRouter } from 'next/navigation';
