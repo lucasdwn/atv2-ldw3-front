@@ -1,6 +1,5 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,13 +29,13 @@ export default function ProfilePage() {
         nome: '',
         email: '',
         senha: '',
-    }); 
+    });
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [profileImage, setProfileImage] = useState<File | null>(null);
-    const [initialImage, setInitialImage] = useState<string | undefined>(undefined); 
+    const [initialImage, setInitialImage] = useState<string | undefined>(undefined);
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -48,7 +47,7 @@ export default function ProfilePage() {
         setIsEditing(false);
         setPassword('');
         setConfirmPassword('');
-        setUserData(originalUserData); 
+        setUserData(originalUserData);
     };
 
     const handleSave = async (e: React.FormEvent) => {
@@ -63,7 +62,7 @@ export default function ProfilePage() {
         formData.append('nome', userData.nome);
         formData.append('email', userData.email);
         if (password) formData.append('senha', password);
-        if (profileImage) formData.append('profileImage', profileImage);
+        if (profileImage) formData.append('image', profileImage);
 
         try {
             await apiService.makeRequest('/usuario/update', {
@@ -93,7 +92,7 @@ export default function ProfilePage() {
                 };
                 setUserData(userData);
                 setOriginalUserData(userData);
-                setInitialImage(response.profileImage); 
+                setInitialImage(response.profileImage);
             }
         } catch (error: any) {
             setError(error.message);
