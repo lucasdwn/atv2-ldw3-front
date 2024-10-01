@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme/themeProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/authContext";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Tarefas",
@@ -21,6 +22,7 @@ export default function RootLayout({
           <AuthProvider>
             <TooltipProvider>
               {children}
+              <Toaster />
             </TooltipProvider>
           </AuthProvider>
         </ThemeProvider>

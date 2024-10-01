@@ -5,6 +5,7 @@ import { ListPlus, CircleChevronLeft, CircleChevronRight } from "lucide-react";
 import { ListItem } from '@/components/list/list-item';
 import useLista from '@/hooks/useLista';
 import Loading from '@/components/loading';
+import { useRouter } from 'next/navigation';
 
 interface ListagemProps {
     title: string;
@@ -16,6 +17,7 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
     const itemsPerPage = 10;
     const [currentPage, setCurrentPage] = useState<number>(1);
     const { listas, total, loading, error, refetch } = useLista(currentPage, itemsPerPage, fetchUrl);
+    const router = useRouter();
 
     if (loading) return <Loading />;
     if (error) return <div>Error: {error}</div>;
@@ -34,12 +36,16 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
         }
     };
 
+    const novaLista = () => {
+        router.push('novaLista')
+    }
+
     return (
         <>
             <header className='mb-3'>
                 <h1 className="text-4xl font-bold mb-3">{title}</h1>
                 {!IsShared && listas && listas.length > 0 && (
-                    <Button onClick={refetch}>
+                    <Button onClick={novaLista}>
                         <ListPlus className="mr-2" />
                         Nova lista
                     </Button>
@@ -87,7 +93,7 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
                         <p className="text-xl mb-4 text-center">{!IsShared ? 'Você ainda não possui listas' : 'Nenhuma lista foi compartilhada com você ainda.'}</p>
                         {
                             !IsShared && (
-                                <Button onClick={refetch}>
+                                <Button onClick={novaLista}>
                                     <ListPlus className="mr-2" />
                                     Nova lista
                                 </Button>
