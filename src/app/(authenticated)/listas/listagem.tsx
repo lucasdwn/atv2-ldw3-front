@@ -6,10 +6,16 @@ import { ListItem } from '@/components/list/list-item';
 import useLista from '@/hooks/useLista';
 import Loading from '@/components/loading';
 
-export default function HomePage() {
+interface ListagemProps {
+    title: string;
+    fetchUrl: string;
+    IsShared: boolean
+}
+
+const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
     const itemsPerPage = 10;
-    const [currentPage, setCurrentPage] = useState(1);
-    const { listas, total, loading, error, refetch } = useLista(currentPage, itemsPerPage);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const { listas, total, loading, error, refetch } = useLista(currentPage, itemsPerPage, fetchUrl);
 
     if (loading) return <Loading />;
     if (error) return <div>Error: {error}</div>;
@@ -31,18 +37,16 @@ export default function HomePage() {
     return (
         <>
             <header className='mb-3'>
-                <h1 className="text-4xl font-bold mb-3">Suas listas</h1>
+                <h1 className="text-4xl font-bold mb-3">{title}</h1>
+                {!IsShared && listas && listas.length > 0 && (
+                    <Button onClick={refetch}>
+                        <ListPlus className="mr-2" />
+                        Nova lista
+                    </Button>
+                )}
             </header>
             <main>
-                {listas.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)]">
-                        <p className="text-xl mb-4 text-center">Crie já sua primeira lista.</p>
-                        <Button onClick={refetch}>
-                            <ListPlus className="mr-2" />
-                            Nova lista
-                        </Button>
-                    </div>
-                ) : (
+                {listas && listas.length > 0 ? (
                     <div className="container mx-auto px-4 py-8">
                         <div className="space-y-4">
                             {listas.map((lista) => (
@@ -50,6 +54,7 @@ export default function HomePage() {
                                     key={lista.id}
                                     lista={lista}
                                     tipoLista={lista.tipoListaId}
+                                    IsShared={IsShared}
                                 />
                             ))}
                         </div>
@@ -77,8 +82,22 @@ export default function HomePage() {
                             </div>
                         </div>
                     </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)]">
+                        <p className="text-xl mb-4 text-center">{!IsShared ? 'Você ainda não possui listas' : 'Nenhuma lista foi compartilhada com você ainda.'}</p>
+                        {
+                            !IsShared && (
+                                <Button onClick={refetch}>
+                                    <ListPlus className="mr-2" />
+                                    Nova lista
+                                </Button>
+                            )
+                        }
+                    </div>
                 )}
             </main>
         </>
     );
-}
+};
+
+export default Listagem;

@@ -28,7 +28,7 @@ export default function LoginPage() {
         e.preventDefault();
         try {
             await login(email, password);
-            router.push('/lists')
+            router.push('/listas/minhasListas')
         } catch (error: any) {
             setError(error.message);
         }

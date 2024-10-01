@@ -15,7 +15,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
 
     useEffect(() => {
         if (!loading && isAuthenticated) {
-            router.push('/lists');
+            router.push('/listas/minhasListas');
         }
     }, [isAuthenticated, loading, router]);
 

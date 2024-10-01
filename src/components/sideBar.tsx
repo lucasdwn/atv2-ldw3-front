@@ -103,7 +103,7 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                                         variant="ghost"
                                         className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}
                                         style={{ minWidth: '44px', minHeight: '44px' }}
-                                        onClick={() => routePush('/profile')}
+                                        onClick={() => routePush('/perfil')}
                                     >
                                         <CircleUserRound className="mr-2" />
                                         {isOpen && <span>Perfil</span>}
@@ -120,7 +120,7 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                                     <Button
                                         variant="ghost"
                                         className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}
-                                        onClick={() => routePush('/lists')}
+                                        onClick={() => routePush('/listas/minhasListas')}
                                     >
                                         <List className="mr-2" />
                                         {isOpen && <span>Minhas listas</span>}
@@ -135,7 +135,10 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                             </Tooltip>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button variant="ghost" className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}>
+                                    <Button
+                                        variant="ghost" className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}
+                                        onClick={() => routePush('/listas/listasCompartilhadas')}
+                                    >
                                         <Share2 className="mr-2" />
                                         {isOpen && <span>Listas compartilhadas</span>}
                                     </Button>

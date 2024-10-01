@@ -6,9 +6,10 @@ import { ILista } from "@/interfaces/ILista";
 interface ListItemProps {
     lista: ILista;
     tipoLista: ITipoLista | string;
+    IsShared: boolean
 }
 
-export function ListItem({ lista, tipoLista }: ListItemProps) {
+export function ListItem({ lista, tipoLista, IsShared }: ListItemProps) {
     const { personalizacao, nome } = lista;
     const { icone, cor } = personalizacao || { icone: '', cor: '' };
 
@@ -35,9 +36,13 @@ export function ListItem({ lista, tipoLista }: ListItemProps) {
                 <Button variant="ghost" size="icon">
                     <SquarePen className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon">
-                    <Trash2 className="h-4 w-4" />
-                </Button>
+                {
+                    !IsShared && (
+                        <Button variant="ghost" size="icon">
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    )
+                }
             </div>
         </div>
     );
