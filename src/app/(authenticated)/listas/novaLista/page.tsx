@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { EmojiPickerComponent } from '@/components/emojiPicker';
 import { ILista } from '@/interfaces/ILista';
 import { listService } from '@/services/listService';
-import { useRouter } from 'next/navigation'; // Para redirecionar
+import { useRouter } from 'next/navigation'; 
 import { useToast } from "@/hooks/use-toast";
 import { ITipoLista } from '@/interfaces/ITipoLista';
 
@@ -20,13 +20,15 @@ export default function CreateList() {
     const [personalizacao, setPersonalizacao] = useState<{ icone: string; cor: string }>({ icone: '📝', cor: '#3B82F6' });
     const [usuariosPermitidos, setUsuariosPermitidos] = useState<string>('');
     const [tipoListas, setTipoListas] = useState<ITipoLista[]>([]);
+    const [searchTerm, setSearchTerm] = useState<string>('');
     const router = useRouter();
     const { toast } = useToast();
+
 
     useEffect(() => {
         const fetchTipoListas = async () => {
             try {
-                const tipos = await listService.getTipoListas();
+                const tipos = await listService.getTipoListas(searchTerm);
                 setTipoListas(tipos);
             } catch (error) {
                 toast({
@@ -36,8 +38,9 @@ export default function CreateList() {
                 });
             }
         };
-        fetchTipoListas();
-    }, []);
+
+        fetchTipoListas(); 
+    }, [searchTerm]);
 
     const handleCreateList = async () => {
         try {
@@ -84,11 +87,18 @@ export default function CreateList() {
 
                     <div className="space-y-2">
                         <Label htmlFor="listType">Tipo de Lista</Label>
+
                         <Select onValueChange={(value) => setTipoListaId(value)}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Selecione o tipo de lista" />
                             </SelectTrigger>
                             <SelectContent>
+                                <Input
+                                    id="searchTipoListas"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Digite para buscar tipos de lista"
+                                />
                                 {tipoListas.map(tipo => (
                                     <SelectItem key={tipo.id} value={tipo.id ?? ""}>
                                         <span className="flex items-center">
