@@ -10,6 +10,7 @@ import ThemeSwitch from '@/components/theme/themeSwitch';
 import PublicLayout from '../publicLayout';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/authContext';
+import { useToast } from '@/hooks/use-toast';
 
 export default function RegisterPage() {
     const [nome, setNome] = useState('');
@@ -20,6 +21,7 @@ export default function RegisterPage() {
     const [error, setError] = useState('');
     const router = useRouter();
     const { register } = useAuth();
+    const { toast } = useToast();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -35,9 +37,18 @@ export default function RegisterPage() {
 
         try {
             await register(nome, email, password);
+            toast({
+                title: "Sucesso",
+                description: "Usuario criado com sucesso!",
+                variant: "default",
+            });
             router.push('/listas/minhasListas')
         } catch (error: any) {
-            setError(error.message);
+            toast({
+                title: `${error.message}`,
+                description: `${error.error}`,
+                variant: "destructive",
+            });
         }
     };
 
@@ -66,7 +77,6 @@ export default function RegisterPage() {
                         </div>
                         <div className="mt-8">
                             <form className="space-y-6" onSubmit={handleRegister}>
-                                {error && <p className="text-red-600">{error}</p>}
                                 <div>
                                     <label htmlFor="nome" className="block text-sm font-medium text-gray-700 dark:text-gray-100">
                                         Nome

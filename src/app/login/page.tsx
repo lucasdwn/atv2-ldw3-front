@@ -11,6 +11,7 @@ import loginImage from "../../assets/images/image-login.webp";
 import ThemeSwitch from '@/components/theme/themeSwitch';
 import PublicLayout from '../publicLayout';
 import { useAuth } from '@/context/authContext';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -19,6 +20,7 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const router = useRouter();
     const { login } = useAuth();
+    const { toast } = useToast();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -28,9 +30,18 @@ export default function LoginPage() {
         e.preventDefault();
         try {
             await login(email, password);
+            toast({
+                title: "Sucesso",
+                description: "Usuario logado com sucesso!",
+                variant: "default",
+            });
             router.push('/listas/minhasListas')
         } catch (error: any) {
-            setError(error.message);
+            toast({
+                title: `${error.message}`,
+                description: `${error.error}`,
+                variant: "destructive",
+            });
         }
     };
 
@@ -62,7 +73,6 @@ export default function LoginPage() {
 
                         <div className="mt-8">
                             <form className="space-y-6" onSubmit={handleLogin}>
-                                {error && <p className="text-red-600">{error}</p>}
                                 <div>
                                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-100">
                                         E-mail

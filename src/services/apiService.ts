@@ -19,7 +19,7 @@ export const apiService = {
                 ...options,
                 headers: {
                     ...headers,
-                    ...(isFormData ? {} : { 'Content-Type': 'application/json' }) 
+                    ...(isFormData ? {} : { 'Content-Type': 'application/json' })
                 },
             });
 
@@ -32,13 +32,18 @@ export const apiService = {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Erro ao fazer requisição');
+                throw {
+                    message: errorData.message,
+                    error: errorData.error
+                }
             }
 
             return response.json();
-        } catch (err) {
-            console.error('Erro ao fazer requisição:', err);
-            throw err;
+        } catch (err: any) {
+            throw {
+                message: err.message,
+                error: err.error
+            }
         }
     },
 

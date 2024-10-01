@@ -9,6 +9,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import { apiService } from '@/services/apiService';
 import Loading from '@/components/loading';
+import { useToast } from '@/hooks/use-toast';
 
 interface User {
     nome: string;
@@ -39,6 +40,7 @@ export default function ProfilePage() {
 
     const [isFetching, setIsFetching] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const { toast } = useToast();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -73,13 +75,23 @@ export default function ProfilePage() {
                 method: 'PUT',
                 body: formData
             });
+            toast({
+                title: "Sucesso",
+                description: "Usuario editado com sucesso!",
+                variant: "default",
+            });
             setIsEditing(false);
             setError('');
             setPassword('');
             setConfirmPassword('');
             fetchUserData();
         } catch (error: any) {
-            setError(error.message);
+            console.log(error)
+            toast({
+                title: `${error.message}`,
+                description: `${error.error}`,
+                variant: "destructive",
+            });
         } finally {
             setIsSaving(false);
         }
@@ -99,9 +111,18 @@ export default function ProfilePage() {
                 };
                 setUserData(userData);
                 setOriginalUserData(userData);
+                toast({
+                    title: "Sucesso",
+                    description: "Usuario editado com sucesso!",
+                    variant: "default",
+                });
             }
         } catch (error: any) {
-            setError(error.message);
+            toast({
+                title: `${error.message}`,
+                description: `${error.error}`,
+                variant: "destructive",
+            });
         } finally {
             setIsFetching(false);
         }
@@ -172,7 +193,6 @@ export default function ProfilePage() {
 
                             <CardContent className="pt-16">
                                 <form className="space-y-4">
-                                    {error && <p className="text-red-600">{error}</p>}
                                     <div>
                                         <Label htmlFor="name">Nome</Label>
                                         <Input

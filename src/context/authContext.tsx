@@ -91,16 +91,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Erro ao fazer login.');
+                throw {
+                    message: errorData.message,
+                    error: errorData.error
+                }
             }
             const { token, refreshToken, usuario } = await response.json();
             localStorage.setItem('token', token);
             localStorage.setItem('usuario', JSON.stringify(usuario));
             localStorage.setItem('refreshToken', refreshToken);
             setIsAuthenticated(true);
-        } catch (error) {
-            console.error('Error logging in:', error);
-            throw error;
+        } catch (error: any) {
+            throw {
+                message: error.message,
+                error: error.error
+            }
         }
     };
 
@@ -113,16 +118,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Erro ao registrar usuário.');
+                throw {
+                    message: errorData.message,
+                    error: errorData.error
+                }
             }
             const { token, refreshToken, usuario } = await response.json();
             localStorage.setItem('token', token);
             localStorage.setItem('usuario', JSON.stringify(usuario));
             localStorage.setItem('refreshToken', refreshToken);
             setIsAuthenticated(true);
-        } catch (error) {
-            console.error('Error registering:', error);
-            throw error;
+        } catch (error: any) {
+            throw {
+                message: error.message,
+                error: error.error
+            }
         }
     };
 

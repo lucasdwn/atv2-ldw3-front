@@ -32,10 +32,10 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
             try {
                 const tipos = await listService.getTipoListas(searchTerm);
                 setTipoListas(tipos);
-            } catch (error) {
+            } catch (error: any) {
                 toast({
-                    title: "Erro",
-                    description: "Erro ao carregar tipos de lista.",
+                    title: `${error.message}`,
+                    description: `${error.error}`,
                     variant: "destructive",
                 });
             }
@@ -56,10 +56,9 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
                     }
                     setPersonalizacao(lista.personalizacao);
                 } catch (error: any) {
-                    console.log(error)
                     toast({
-                        title: "Erro",
-                        description: `${error.message}`,
+                        title: `${error.message}`,
+                        description: `${error.error}`,
                         variant: "destructive",
                     });
                 }
@@ -95,8 +94,8 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
             router.push('/listas/minhasListas');
         } catch (error: any) {
             toast({
-                title: `Erro ao ${isEditing ? 'atualizar' : 'criar'} lista`,
-                description: `${error.message}`,
+                title: `${error.message}`,
+                description: `${error.error}`,
                 variant: "destructive",
             });
         }

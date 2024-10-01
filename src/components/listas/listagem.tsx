@@ -18,7 +18,7 @@ import {
     AlertDialogDescription,
     AlertDialogAction,
     AlertDialogCancel
-} from "@/components/ui/alert-dialog"; // ajuste o caminho conforme sua estrutura
+} from "@/components/ui/alert-dialog"; 
 
 interface ListagemProps {
     title: string;
@@ -33,7 +33,7 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
     const router = useRouter();
     const { toast } = useToast();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [listToDelete, setListToDelete] = useState<string | null>(null); // Armazena a lista a ser deletada
+    const [listToDelete, setListToDelete] = useState<string | null>(null); 
 
     if (loading) return <Loading />;
     if (error) return <div>Error: {error}</div>;
@@ -67,8 +67,8 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
             refetch();
         } catch (error: any) {
             toast({
-                title: `Erro ao deletar lista`,
-                description: `${error.message}`,
+                title: `${error.message}`,
+                description: `${error.error}`,
                 variant: "destructive",
             });
         }
