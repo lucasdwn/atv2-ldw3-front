@@ -18,8 +18,8 @@ export function ListItem({ lista, tipoLista }: ListItemProps) {
     const tipoIcone = tipoPersonalizacao ? tipoPersonalizacao.icone : '📃';
 
     return (
-        <div className="flex items-center justify-between p-4 bg-white dark:bg-[#1E1E1E] rounded-lg shadow-md border border-gray-200 mb-4">
-            <div className="flex items-center space-x-4">
+        <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-white dark:bg-[#1E1E1E] rounded-lg shadow-md border border-gray-200 mb-4">
+            <div className="flex items-center space-x-4 mb-2 md:mb-0">
                 <div className="flex items-center space-x-2">
                     <span className="text-2xl">{icone}</span>
                     <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cor }}></div>

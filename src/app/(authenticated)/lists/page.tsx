@@ -7,14 +7,14 @@ import useLista from '@/hooks/useLista';
 import Loading from '@/components/loading';
 
 export default function HomePage() {
-    const itemsPerPage = 10; 
-    const [currentPage, setCurrentPage] = useState(1); 
+    const itemsPerPage = 10;
+    const [currentPage, setCurrentPage] = useState(1);
     const { listas, total, loading, error, refetch } = useLista(currentPage, itemsPerPage);
 
     if (loading) return <Loading />;
     if (error) return <div>Error: {error}</div>;
 
-    const totalPages = Math.ceil(total / itemsPerPage); 
+    const totalPages = Math.ceil(total / itemsPerPage);
 
     const nextPage = () => {
         if (currentPage < totalPages) {
@@ -32,7 +32,6 @@ export default function HomePage() {
         <>
             <header className='mb-3'>
                 <h1 className="text-4xl font-bold mb-3">Suas listas</h1>
-               
             </header>
             <main>
                 {listas.length === 0 ? (
@@ -56,7 +55,7 @@ export default function HomePage() {
                         </div>
 
                         <div className="flex flex-col justify-start mt-4">
-                            <div className='flex gap-2 mb-3'>
+                            <div className='flex gap-2 mb-3 justify-center'>
                                 <button onClick={prevPage} disabled={currentPage === 1} className="flex items-center">
                                     <span className={`text-xl transition-transform duration-200 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'}`}>
                                         <CircleChevronLeft />
@@ -72,7 +71,7 @@ export default function HomePage() {
                                     </span>
                                 </button>
                             </div>
-                            <div className="flex flex-col ">
+                            <div className="flex flex-col text-center">
                                 <span>Página {currentPage} de {totalPages}</span>
                                 <span>Total de listas: {total}</span>
                             </div>
