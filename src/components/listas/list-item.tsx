@@ -1,17 +1,21 @@
+'use client';
 import { SquarePen, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ITipoLista } from "@/interfaces/ITipoLista";
 import { ILista } from "@/interfaces/ILista";
+import { useRouter } from "next/navigation";
 
 interface ListItemProps {
     lista: ILista;
     tipoLista: ITipoLista | string;
     IsShared: boolean
+    onDelete: (id: string) => void;
 }
 
-export function ListItem({ lista, tipoLista, IsShared }: ListItemProps) {
+export function ListItem({ lista, tipoLista, IsShared, onDelete }: ListItemProps) {
     const { personalizacao, nome } = lista;
     const { icone, cor } = personalizacao || { icone: '', cor: '' };
+    const router = useRouter();
 
     const tipoNome = typeof tipoLista === 'string' ? tipoLista : tipoLista.nome;
     const tipoPersonalizacao = typeof tipoLista === 'object' ? tipoLista.personalizacao : null;
@@ -33,12 +37,12 @@ export function ListItem({ lista, tipoLista, IsShared }: ListItemProps) {
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tipoCor }}></div>
                     <span className="text-sm font-medium">{tipoNome}</span>
                 </div>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" onClick={() => router.push(`editar/${lista.id}`)}>
                     <SquarePen className="h-4 w-4" />
                 </Button>
                 {
                     !IsShared && (
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => onDelete(lista.id ?? "")}>
                             <Trash2 className="h-4 w-4" />
                         </Button>
                     )

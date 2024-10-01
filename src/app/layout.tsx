@@ -21,8 +21,8 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <TooltipProvider>
-              {children}
               <Toaster />
+              {children}
             </TooltipProvider>
           </AuthProvider>
         </ThemeProvider>

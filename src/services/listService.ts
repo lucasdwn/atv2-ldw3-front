@@ -19,4 +19,23 @@ export const listService = {
             method: 'GET',
         });
     },
+
+    async buscarLista(listaId: string): Promise<ILista> {
+        return await apiService.makeRequest(`/lista/get/${listaId}`, {
+            method: 'GET',
+        });
+    },
+
+    async updateLista(listaId: string, lista: ILista): Promise<ILista> {
+        return await apiService.makeRequest(`/lista/update/${listaId}`, {
+            method: 'PUT',
+            body: JSON.stringify(lista),
+        });
+    },
+
+    async deleteLista(listaId: string): Promise<ILista> {
+        return await apiService.makeRequest(`/lista/delete/${listaId}`, {
+            method: 'DELETE',
+        });
+    },
 };

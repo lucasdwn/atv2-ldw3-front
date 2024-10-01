@@ -10,5 +10,5 @@ export interface ILista {
     usuariosPermitidos?: IUsuarioPermitido[];
     criadoEm?: Date;
     atualizadoEm?: Date;
-    personalizacao?: IPersonalizacao;
+    personalizacao: IPersonalizacao;
 }

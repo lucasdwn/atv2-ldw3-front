@@ -2,10 +2,23 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ListPlus, CircleChevronLeft, CircleChevronRight } from "lucide-react";
-import { ListItem } from '@/components/list/list-item';
+import { ListItem } from '@/components/listas/list-item';
 import useLista from '@/hooks/useLista';
 import Loading from '@/components/loading';
 import { useRouter } from 'next/navigation';
+import { listService } from '@/services/listService';
+import { useToast } from '@/hooks/use-toast';
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogFooter,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogAction,
+    AlertDialogCancel
+} from "@/components/ui/alert-dialog"; // ajuste o caminho conforme sua estrutura
 
 interface ListagemProps {
     title: string;
@@ -18,6 +31,9 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const { listas, total, loading, error, refetch } = useLista(currentPage, itemsPerPage, fetchUrl);
     const router = useRouter();
+    const { toast } = useToast();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [listToDelete, setListToDelete] = useState<string | null>(null); // Armazena a lista a ser deletada
 
     if (loading) return <Loading />;
     if (error) return <div>Error: {error}</div>;
@@ -37,8 +53,39 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
     };
 
     const novaLista = () => {
-        router.push('novaLista')
-    }
+        router.push('novaLista');
+    };
+
+    const handleDelete = async (listaId: string) => {
+        try {
+            await listService.deleteLista(listaId);
+            toast({
+                title: "Sucesso",
+                description: "Lista removida com sucesso!",
+                variant: "default",
+            });
+            refetch();
+        } catch (error: any) {
+            toast({
+                title: `Erro ao deletar lista`,
+                description: `${error.message}`,
+                variant: "destructive",
+            });
+        }
+    };
+
+    const openDialog = (listaId: string) => {
+        setListToDelete(listaId);
+        setIsDialogOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (listToDelete) {
+            handleDelete(listToDelete);
+            setListToDelete(null);
+            setIsDialogOpen(false);
+        }
+    };
 
     return (
         <>
@@ -61,6 +108,7 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
                                     lista={lista}
                                     tipoLista={lista.tipoListaId}
                                     IsShared={IsShared}
+                                    onDelete={() => openDialog(lista.id ?? "")} // Passa o ID da lista para o diálogo
                                 />
                             ))}
                         </div>
@@ -102,6 +150,22 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
                     </div>
                 )}
             </main>
+
+            {/* Alert Dialog for Delete Confirmation */}
+            <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmar Remoção</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Você realmente deseja remover essa lista?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setIsDialogOpen(false)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete}>Confirmar</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 };
