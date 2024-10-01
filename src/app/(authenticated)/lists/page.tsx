@@ -1,144 +1,84 @@
-import React from 'react';
+'use client';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ListPlus } from "lucide-react";
+import { ListPlus, CircleChevronLeft, CircleChevronRight } from "lucide-react";
 import { ListItem } from '@/components/list/list-item';
-import { ILista } from '@/interfaces/ILista';
-
+import useLista from '@/hooks/useLista';
+import Loading from '@/components/loading';
 
 export default function HomePage() {
+    const itemsPerPage = 10; 
+    const [currentPage, setCurrentPage] = useState(1); 
+    const { listas, total, loading, error, refetch } = useLista(currentPage, itemsPerPage);
 
-    
+    if (loading) return <Loading />;
+    if (error) return <div>Error: {error}</div>;
 
-    const listasExemplo: ILista[] = [
-        {
-            id: "lista1",
-            usuarioId: "usuario123",
-            tipoListaId: {
-                id: "tipo1",
-                usuarioId: "usuario123",
-                nome: "Lista de Tarefas",
-                criadoEm: new Date(),
-                atualizadoEm: new Date(),
-                personalizacao: {
-                    id: "personalizacao1",
-                    icone: "📝", // Ícone para o tipo de lista
-                    cor: "#4CAF50", // Cor verde
-                    criadoEm: new Date(),
-                    atualizadoEm: new Date(),
-                },
-            },
-            nome: "Minha Lista de Compras",
-            criadoEm: new Date(),
-            atualizadoEm: new Date(),
-            personalizacao: {
-                id: "personalizacao2",
-                icone: "🛒", // Ícone para a lista
-                cor: "#FF9800", // Cor laranja
-                criadoEm: new Date(),
-                atualizadoEm: new Date(),
-            },
-        },
-        {
-            id: "lista2",
-            usuarioId: "usuario124",
-            tipoListaId: {
-                id: "tipo2",
-                usuarioId: "usuario124",
-                nome: "Lista de Compras",
-                criadoEm: new Date(),
-                atualizadoEm: new Date(),
-                personalizacao: {
-                    id: "personalizacao3",
-                    icone: "🛍️", // Ícone para o tipo de lista
-                    cor: "#2196F3", // Cor azul
-                    criadoEm: new Date(),
-                    atualizadoEm: new Date(),
-                },
-            },
-            nome: "Lista de Compras para Festa",
-            criadoEm: new Date(),
-            atualizadoEm: new Date(),
-            personalizacao: {
-                id: "personalizacao4",
-                icone: "🎉", // Ícone para a lista
-                cor: "#FF5722", // Cor laranja escuro
-                criadoEm: new Date(),
-                atualizadoEm: new Date(),
-            },
-        },
-        {
-            id: "lista3",
-            usuarioId: "usuario125",
-            tipoListaId: {
-                id: "tipo3",
-                usuarioId: "usuario125",
-                nome: "Lista de Atividades",
-                criadoEm: new Date(),
-                atualizadoEm: new Date(),
-                personalizacao: {
-                    id: "personalizacao5",
-                    icone: "📅", // Ícone para o tipo de lista
-                    cor: "#9C27B0", // Cor roxa
-                    criadoEm: new Date(),
-                    atualizadoEm: new Date(),
-                },
-            },
-            nome: "Lista de Estudos",
-            criadoEm: new Date(),
-            atualizadoEm: new Date(),
-            personalizacao: {
-                id: "personalizacao6",
-                icone: "📖", // Ícone para a lista
-                cor: "#FFEB3B", // Cor amarela
-                criadoEm: new Date(),
-                atualizadoEm: new Date(),
-            },
-        },
-    ];
+    const totalPages = Math.ceil(total / itemsPerPage); 
+
+    const nextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(prevPage => prevPage + 1);
+        }
+    };
+
+    const prevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(prevPage => prevPage - 1);
+        }
+    };
 
     return (
         <>
-
             <header className='mb-3'>
                 <h1 className="text-4xl font-bold mb-3">Suas listas</h1>
-                {
-                    listasExemplo && listasExemplo.length !== 0 ? (
-                        <Button>
+               
+            </header>
+            <main>
+                {listas.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)]">
+                        <p className="text-xl mb-4 text-center">Crie já sua primeira lista.</p>
+                        <Button onClick={refetch}>
                             <ListPlus className="mr-2" />
                             Nova lista
                         </Button>
-                    ) : ''
-                }
-
-            </header>
-            <main>
-                {
-                    listasExemplo && listasExemplo.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)]">
-                            <p className="text-xl mb-4 text-center">Crie já sua primeira lista.</p>
-                            <Button>
-                                <ListPlus className="mr-2" />
-                                Nova lista
-                            </Button>
+                    </div>
+                ) : (
+                    <div className="container mx-auto px-4 py-8">
+                        <div className="space-y-4">
+                            {listas.map((lista) => (
+                                <ListItem
+                                    key={lista.id}
+                                    lista={lista}
+                                    tipoLista={lista.tipoListaId}
+                                />
+                            ))}
                         </div>
 
-                    ) :
-                        (
-                            <div className="container mx-auto px-4 py-8">
-
-                                <div className="space-y-4">
-                                    {listasExemplo.map((lista) => (
-                                        <ListItem
-                                            key={lista.id}
-                                            lista={lista}
-                                            tipoLista={lista.tipoListaId}
-                                        />
-                                    ))}
-
-                                </div>
+                        <div className="flex flex-col justify-start mt-4">
+                            <div className='flex gap-2 mb-3'>
+                                <button onClick={prevPage} disabled={currentPage === 1} className="flex items-center">
+                                    <span className={`text-xl transition-transform duration-200 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'}`}>
+                                        <CircleChevronLeft />
+                                    </span>
+                                </button>
+                                <button
+                                    onClick={nextPage}
+                                    disabled={currentPage >= totalPages}
+                                    className="flex items-center"
+                                >
+                                    <span className={`text-xl transition-transform duration-200 ${currentPage >= totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'}`}>
+                                        <CircleChevronRight />
+                                    </span>
+                                </button>
                             </div>
-                        )
-                }
+                            <div className="flex flex-col ">
+                                <span>Página {currentPage} de {totalPages}</span>
+                                <span>Total de listas: {total}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </main>
         </>
     );

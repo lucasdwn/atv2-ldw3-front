@@ -5,18 +5,17 @@ import { ILista } from "@/interfaces/ILista";
 
 interface ListItemProps {
     lista: ILista;
-    tipoLista: ITipoLista | string; // Aceitar tipoLista como string ou objeto
+    tipoLista: ITipoLista | string;
 }
 
 export function ListItem({ lista, tipoLista }: ListItemProps) {
     const { personalizacao, nome } = lista;
     const { icone, cor } = personalizacao || { icone: '', cor: '' };
 
-    // Verifica se tipoLista é um objeto e extrai suas propriedades
     const tipoNome = typeof tipoLista === 'string' ? tipoLista : tipoLista.nome;
     const tipoPersonalizacao = typeof tipoLista === 'object' ? tipoLista.personalizacao : null;
-    const tipoCor = tipoPersonalizacao ? tipoPersonalizacao.cor : '#000'; // Cor padrão se não houver
-    const tipoIcone = tipoPersonalizacao ? tipoPersonalizacao.icone : '🔹'; // Ícone padrão se não houver
+    const tipoCor = tipoPersonalizacao ? tipoPersonalizacao.cor : '#8146FF';
+    const tipoIcone = tipoPersonalizacao ? tipoPersonalizacao.icone : '📃';
 
     return (
         <div className="flex items-center justify-between p-4 bg-white dark:bg-[#1E1E1E] rounded-lg shadow-md border border-gray-200 mb-4">
