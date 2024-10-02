@@ -10,9 +10,10 @@ import { listService } from '@/services/listService';
 import { SquarePen } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { ITarefa } from '@/interfaces/ITarefa';
+import { IOrdenacao, ITarefa } from '@/interfaces/ITarefa';
 import { StatusEnum } from '@/enums/tarefasEnum';
 import Loading from '@/components/loading';
+import { taskService } from '@/services/taskService';
 
 export default function VisualizarLista() {
     const { listaId } = useParams() as { listaId: string };
@@ -41,22 +42,22 @@ export default function VisualizarLista() {
 
         setTarefas(items);
 
-        const updatedOrder = items.map((item, index) => ({
-            id: item.id,
-            order: index + 1
+        const updatedOrder: IOrdenacao[] = items.map((item, index) => ({
+            id: item.id ?? "",
+            ordenacao: index + 1
         }));
 
         console.log(updatedOrder);
         // Atualize a ordem no backend
-        // try {
-        //     await listService.updateTaskOrder(listaId, updatedOrder); 
-        // } catch (error: any) {
-        //     toast({
-        //         title: 'Erro ao atualizar a ordem das tarefas',
-        //         description: error.message,
-        //         variant: 'destructive',
-        //     });
-        // }
+        try {
+            await taskService.atualizarOrdenacao(listaId, updatedOrder);
+        } catch (error: any) {
+            toast({
+                title: error.message,
+                description: error.error,
+                variant: 'destructive',
+            });
+        }
     };
 
     const handleToggleComplete = async (id: string, isCompleted: boolean) => {

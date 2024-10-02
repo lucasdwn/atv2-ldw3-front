@@ -27,3 +27,8 @@ export interface ISubTarefa {
     criadoEm?: Date;
     isFinalizada?: boolean;
 }
+
+export interface IOrdenacao {
+    id: string;
+    ordenacao: number;
+}
