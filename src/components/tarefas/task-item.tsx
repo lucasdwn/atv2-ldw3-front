@@ -1,62 +1,77 @@
 'use client';
 
-import { Trash2, GripVertical, SquarePen } from "lucide-react";
+import { Trash2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ITarefa } from "@/interfaces/ITarefa";
 import { IPrioridade } from "@/interfaces/IPrioridade";
 import { useRouter } from "next/navigation";
+import dateService from "@/utils/dateService";
+import { StatusEnum } from "@/enums/tarefasEnum";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TarefaProps {
-    tarefa: ITarefa
+    tarefa: ITarefa;
     prioridade: IPrioridade | string;
-    onEditar: () => void;
     onExcluir: () => void;
+    onToggleComplete: (id: string, isCompleted: boolean) => void;
+    onClick: () => void;
 }
 
 export default function Tarefa({
     tarefa,
     prioridade,
-    onEditar,
-    onExcluir
+    onExcluir,
+    onToggleComplete,
+    onClick
 }: TarefaProps) {
-
-    const { titulo, dataDeVencimento } = tarefa;
-
-
+    const { id, titulo, dataDeVencimento, status } = tarefa;
+    const router = useRouter();
 
     const prioridadeNome = typeof prioridade === 'string' ? prioridade : prioridade.nome;
     const prioridadePersonalizacao = typeof prioridade === 'object' ? prioridade.personalizacao : null;
     const prioridadeCor = prioridadePersonalizacao ? prioridadePersonalizacao.cor : '#8146FF';
     const prioridadeIcone = prioridadePersonalizacao ? prioridadePersonalizacao.icone : '📃';
-    const router = useRouter();
 
+    if (!tarefa.realizadoEm && status !== StatusEnum.Concluida) {
+        const dataDeVencimento = dateService.getDataSemHoras(new Date(tarefa.dataDeVencimento));
+        const dataAtual = dateService.getDataSemHoras(dateService.getServiceDate());
 
-    const formatarData = (data: Date | string) => {
-        const dataObj = typeof data === 'string' ? new Date(data) : data;
-        if (isNaN(dataObj.getTime())) {
-            return 'Data inválida';
+        if (dataDeVencimento.getTime() < dataAtual.getTime()) {
+            tarefa.status = StatusEnum.Atrasada;
+        } else {
+            tarefa.status = StatusEnum.Pendente;
         }
-        const dia = String(dataObj.getDate()).padStart(2, '0');
-        const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
-        const ano = dataObj.getFullYear();
+    }
 
-        return `${dia}/${mes}/${ano}`;
+    const statusStyle = (status === StatusEnum.Pendente ? "bg-yellow-100 text-yellow-800" : (status === StatusEnum.Concluida ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"));
+
+    const dataFormatada = dateService.formatarData(dataDeVencimento);
+
+    const handleCheckboxChange = (checked: boolean) => {
+        onToggleComplete(id ?? "", checked);
     };
 
-
-    const dataFormatada = formatarData(dataDeVencimento);
-
     return (
-        <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-white dark:bg-[#1E1E1E] hover:bg-gray-300 dark:hover:bg-gray-700 rounded-lg shadow-md border border-gray-200 mb-2 cursor-pointer">
+        <div
+            className="flex flex-col md:flex-row items-center justify-between p-4 bg-white dark:bg-[#1E1E1E] hover:bg-gray-300 dark:hover:bg-gray-700 rounded-lg shadow-md border border-gray-200 mb-2 cursor-pointer"
+            onClick={onClick}
+        >
             <div className="flex items-center space-x-4 flex-grow">
-                <GripVertical className="h-5 w-5 text-gray-400 cursor-move" />
+                <div className="cursor-grab mr-2">
+                    <GripVertical size={20} />
+                </div>
+                <Checkbox
+                    checked={status === StatusEnum.Concluida}
+                    onCheckedChange={handleCheckboxChange}
+                    onClick={(e) => e.stopPropagation()}
+                />
                 <div className="flex-grow">
                     <h2 className="text-lg font-semibold">{titulo}</h2>
                     <div className="flex items-center space-x-2 text-sm text-gray-500">
                         <span className="dark:text-gray-300">Vencimento: {dataFormatada}</span>
-                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                            {tarefa.status}
+                        <Badge variant="secondary" className={statusStyle}>
+                            {status}
                         </Badge>
                     </div>
                 </div>
@@ -68,10 +83,7 @@ export default function Tarefa({
                     <span className="text-sm font-medium">{prioridadeNome}</span>
                 </div>
 
-                <Button variant="ghost" size="icon" onClick={onEditar}>
-                    <SquarePen className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={onExcluir}>
+                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onExcluir(); }}>
                     <Trash2 className="h-4 w-4" />
                 </Button>
             </div>

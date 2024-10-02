@@ -10,7 +10,7 @@ export interface ITarefa {
     descricao: string;
     ordenacao?: number;
     prioridadeId: string | IPrioridade;
-    status?: StatusEnum;
+    status: StatusEnum;
     subTarefas?: ISubTarefa[];
     anexos?: IAnexo[];
     dataDeVencimento: Date;

@@ -1,6 +1,6 @@
 'use client';
 
-import Loading from '@/components/loading';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Tarefa from '@/components/tarefas/task-item';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -10,6 +10,9 @@ import { listService } from '@/services/listService';
 import { SquarePen } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { ITarefa } from '@/interfaces/ITarefa';
+import { StatusEnum } from '@/enums/tarefasEnum';
+import Loading from '@/components/loading';
 
 export default function VisualizarLista() {
     const { listaId } = useParams() as { listaId: string };
@@ -18,9 +21,77 @@ export default function VisualizarLista() {
     const [tipoLista, setTipoLista] = useState<ITipoLista>({ nome: '' });
     const { toast } = useToast();
     const router = useRouter();
-    const { tarefas, loading, refetch } = useTarefa(listaId);
+    const { tarefas: initialTarefas, loading, refetch } = useTarefa(listaId);
+    const [tarefas, setTarefas] = useState<ITarefa[]>([]);
 
-    if (!listaId) return <Loading />;
+    useEffect(() => {
+        if (initialTarefas) {
+            setTarefas(initialTarefas);
+        }
+    }, [initialTarefas]);
+
+    const onDragEnd = async (result: any) => {
+        if (!result.destination) {
+            return;
+        }
+
+        const items = Array.from(tarefas);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+
+        setTarefas(items);
+
+        const updatedOrder = items.map((item, index) => ({
+            id: item.id,
+            order: index + 1
+        }));
+
+        console.log(updatedOrder);
+        // Atualize a ordem no backend
+        // try {
+        //     await listService.updateTaskOrder(listaId, updatedOrder); 
+        // } catch (error: any) {
+        //     toast({
+        //         title: 'Erro ao atualizar a ordem das tarefas',
+        //         description: error.message,
+        //         variant: 'destructive',
+        //     });
+        // }
+    };
+
+    const handleToggleComplete = async (id: string, isCompleted: boolean) => {
+        const updatedTarefas = tarefas.map((tarefa: ITarefa) =>
+            tarefa.id === id
+                ? { ...tarefa, status: isCompleted ? StatusEnum.Concluida : StatusEnum.Pendente }
+                : tarefa
+        );
+        setTarefas(updatedTarefas);
+        // Atualizar no backend
+        // try {
+        //     await listService.updateTaskStatus(id, isCompleted);
+        // } catch (error: any) {
+        //     toast({
+        //         title: 'Erro ao atualizar tarefa',
+        //         description: error.message,
+        //         variant: 'destructive',
+        //     });
+        // }
+    };
+
+    const handleExcluir = async (id: string) => {
+        const updatedTarefas = tarefas.filter(tarefa => tarefa.id !== id);
+        setTarefas(updatedTarefas);
+        // Excluir no backend
+        // try {
+        //     await listService.deleteTask(id);
+        // } catch (error: any) {
+        //     toast({
+        //         title: 'Erro ao excluir tarefa',
+        //         description: error.message,
+        //         variant: 'destructive',
+        //     });
+        // }
+    };
 
     const fetchLista = async () => {
         try {
@@ -33,8 +104,8 @@ export default function VisualizarLista() {
             setPersonalizacao(lista.personalizacao);
         } catch (error: any) {
             toast({
-                title: `${error.message}`,
-                description: `${error.error}`,
+                title: error.message,
+                description: error.error,
                 variant: "destructive",
             });
         }
@@ -44,6 +115,8 @@ export default function VisualizarLista() {
         fetchLista();
         refetch();
     }, []);
+
+    if (!listaId) return <Loading />;
 
     return (
         <div>
@@ -70,26 +143,37 @@ export default function VisualizarLista() {
                     </div>
                 </div>
             </header>
-            <main>
-                {
-                    tarefas && tarefas.length > 0 ? (
-                        <div>
-                            {
-                                tarefas.map((tarefa) => (
-                                    <Tarefa
-                                        key={tarefa.id}
-                                        tarefa={tarefa}
-                                        prioridade={tarefa.prioridadeId}
-                                        onEditar={() => console.log('Editar tarefa')}
-                                        onExcluir={() => console.log('Excluir tarefa')}
-                                    />
-                                ))
-                            }
+            <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable droppableId="droppable">
+                    {(provided) => (
+                        <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                        >
+                            {tarefas.map((tarefa, index) => (
+                                <Draggable key={tarefa.id} draggableId={tarefa.id ?? ""} index={index}>
+                                    {(provided) => (
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                        >
+                                            <Tarefa
+                                                tarefa={tarefa}
+                                                prioridade={tarefa.prioridadeId}
+                                                onExcluir={() => handleExcluir(tarefa.id ?? "")}
+                                                onToggleComplete={handleToggleComplete}
+                                                onClick={() => router.push(`/listas/lista/${listaId}/tarefa/${tarefa.id}`)}
+                                            />
+                                        </div>
+                                    )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
                         </div>
-
-                    ) : ""
-                }
-            </main>
+                    )}
+                </Droppable>
+            </DragDropContext>
         </div>
     );
 }
