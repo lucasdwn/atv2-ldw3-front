@@ -59,7 +59,11 @@ export default function ProfilePage() {
         e.preventDefault();
 
         if (password !== confirmPassword) {
-            setError('As senhas não correspondem.');
+            toast({
+                title: `Erro ao editar usuário`,
+                description: `As senhas não correspondem.`,
+                variant: "destructive",
+            });
             return;
         }
 
@@ -270,7 +274,7 @@ export default function ProfilePage() {
                                             </div>
                                         </>
                                     ) : (
-                                        <div className='flex w-full gap-2'>
+                                        <div className='flex flex-col sm:flex-row w-full gap-2'>
                                             <div className='w-full'>
                                                 <Label htmlFor="criadoem">Data de criação</Label>
                                                 <Input

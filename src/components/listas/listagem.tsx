@@ -108,7 +108,7 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
                                     lista={lista}
                                     tipoLista={lista.tipoListaId}
                                     IsShared={IsShared}
-                                    onDelete={() => openDialog(lista.id ?? "")} // Passa o ID da lista para o diálogo
+                                    onDelete={() => openDialog(lista.id ?? "")} 
                                 />
                             ))}
                         </div>

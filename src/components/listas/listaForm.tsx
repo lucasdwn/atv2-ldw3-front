@@ -227,10 +227,10 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
                                 </div>
                                 <ul className='flex flex-col gap-2'>
                                     {usuariosPermitidos.map((usuario, index) => (
-                                        <li key={index} className="flex justify-between items-center">
+                                        <li key={index} className="flex justify-between items-center flex-col sm:flex-row">
                                             <div className='flex flex-col md:flex-row space-x-0 md:space-x-2 p-2'>
-                                                <span><span className='font-medium'>Email:</span> {usuario.email}</span>
-                                                <span><span className='font-medium'>Edição:</span> {usuario.podeEditar ? "Permitido" : "Não Permitido"}</span>
+                                                <span><span className=''>Email:</span> {usuario.email}</span>
+                                                <span><span className=''>Edição:</span> {usuario.podeEditar ? "Permitido" : "Não Permitido"}</span>
                                             </div>
                                             <div>
                                                 <Button variant="destructive" onClick={() => handleRemoveUsuario(usuario.email)}>Remover</Button>

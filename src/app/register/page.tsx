@@ -31,7 +31,11 @@ export default function RegisterPage() {
         e.preventDefault();
 
         if (password !== confirmPassword) {
-            setError('As senhas não correspondem.');
+            toast({
+                title: `Erro ao criar usuário`,
+                description: `As senhas não correspondem.`,
+                variant: "destructive",
+            });
             return;
         }
 
