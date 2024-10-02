@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
-import { CircleChevronLeft, CircleChevronRight, ListCheck, CircleUserRound, List, Share2, LogOut } from 'lucide-react'
+import { CircleChevronLeft, CircleChevronRight, ListCheck, CircleUserRound, List, Share2, LogOut, FileType, ShieldAlert } from 'lucide-react'
 import ThemeSwitch from './theme/themeSwitch'
 import { useAuth } from '@/context/authContext'
 import { useRouter } from 'next/navigation'
@@ -97,6 +97,9 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                             <ThemeSwitch />
                         </div>
                         <nav className={`${isOpen ? 'space-y-2' : 'lg:flex lg:flex-col lg:items-center lg:justify-between lg:mb-8'}`}>
+                            <div className={` border-b border-gray-400 mt-2 ${isOpen ? 'flex' : 'hidden'}`}>
+                                <span className={`text-sm font-medium `}></span>
+                            </div>
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button
@@ -146,6 +149,43 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                                 {!isOpen &&
                                     <TooltipContent side="right" align="center" className="ml-2">
                                         <span>Listas compartilhadas</span>
+                                    </TooltipContent>
+                                }
+                            </Tooltip>
+                            <div className={` border-b border-gray-400 mt-2 ${isOpen ? 'flex' : 'hidden'}`}>
+                                <span className={`text-sm font-medium `}>Personalizações</span>
+                            </div>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost" className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}
+                                        onClick={() => routePush('/tiposDeListas')}
+                                        disabled
+                                    >
+                                        <FileType className="mr-2" />
+                                        {isOpen && <span>Tipos de lista</span>}
+                                    </Button>
+                                </TooltipTrigger>
+                                {!isOpen &&
+                                    <TooltipContent side="right" align="center" className="ml-2">
+                                        <span>Tipos de lista</span>
+                                    </TooltipContent>
+                                }
+                            </Tooltip>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost" className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}
+                                        onClick={() => routePush('/prioridades')}
+                                        disabled
+                                    >
+                                        <ShieldAlert className="mr-2" />
+                                        {isOpen && <span>Prioridades</span>}
+                                    </Button>
+                                </TooltipTrigger>
+                                {!isOpen &&
+                                    <TooltipContent side="right" align="center" className="ml-2">
+                                        <span>Prioridades</span>
                                     </TooltipContent>
                                 }
                             </Tooltip>
