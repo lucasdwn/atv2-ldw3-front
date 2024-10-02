@@ -24,6 +24,7 @@ export default function VisualizarLista() {
     const router = useRouter();
     const { tarefas: initialTarefas, loading, refetch } = useTarefa(listaId);
     const [tarefas, setTarefas] = useState<ITarefa[]>([]);
+    const [isPermitidoEditar, setIsPermitidoEditar] = useState<boolean>(false);
 
     useEffect(() => {
         if (initialTarefas) {
@@ -47,8 +48,6 @@ export default function VisualizarLista() {
             ordenacao: index + 1
         }));
 
-        console.log(updatedOrder);
-        // Atualize a ordem no backend
         try {
             await taskService.atualizarOrdenacao(listaId, updatedOrder);
         } catch (error: any) {
@@ -103,6 +102,7 @@ export default function VisualizarLista() {
                 setTipoLista(lista.tipoListaId);
             }
             setPersonalizacao(lista.personalizacao);
+            setIsPermitidoEditar(lista.isPermitidoEditar || false)
         } catch (error: any) {
             toast({
                 title: error.message,
@@ -117,7 +117,7 @@ export default function VisualizarLista() {
         refetch();
     }, []);
 
-    if (!listaId) return <Loading />;
+    if (!listaId && loading) return <Loading />;
 
     return (
         <div>
@@ -152,7 +152,7 @@ export default function VisualizarLista() {
                             {...provided.droppableProps}
                         >
                             {tarefas.map((tarefa, index) => (
-                                <Draggable key={tarefa.id} draggableId={tarefa.id ?? ""} index={index}>
+                                <Draggable key={tarefa.id} draggableId={tarefa.id ?? ""} index={index} isDragDisabled={!isPermitidoEditar}>
                                     {(provided) => (
                                         <div
                                             ref={provided.innerRef}
@@ -165,6 +165,7 @@ export default function VisualizarLista() {
                                                 onExcluir={() => handleExcluir(tarefa.id ?? "")}
                                                 onToggleComplete={handleToggleComplete}
                                                 onClick={() => router.push(`/listas/lista/${listaId}/tarefa/${tarefa.id}`)}
+                                                isPermitidoEditar={isPermitidoEditar}
                                             />
                                         </div>
                                     )}

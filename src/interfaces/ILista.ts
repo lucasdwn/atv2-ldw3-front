@@ -12,4 +12,5 @@ export interface ILista {
     atualizadoEm?: Date;
     personalizacao: IPersonalizacao;
     isEditUsuarios?: boolean;
+    isPermitidoEditar?: boolean;
 }

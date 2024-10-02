@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface TarefaProps {
     tarefa: ITarefa;
     prioridade: IPrioridade | string;
+    isPermitidoEditar: boolean;
     onExcluir: () => void;
     onToggleComplete: (id: string, isCompleted: boolean) => void;
     onClick: () => void;
@@ -21,6 +22,7 @@ interface TarefaProps {
 export default function Tarefa({
     tarefa,
     prioridade,
+    isPermitidoEditar,
     onExcluir,
     onToggleComplete,
     onClick
@@ -58,13 +60,14 @@ export default function Tarefa({
             onClick={onClick}
         >
             <div className="flex items-center space-x-4 flex-grow">
-                <div className="cursor-grab mr-2">
+                <div className={` mr-2 ${isPermitidoEditar ? "cursor-grab" : " cursor-not-allowed"}`}>
                     <GripVertical size={20} />
                 </div>
                 <Checkbox
                     checked={status === StatusEnum.Concluida}
                     onCheckedChange={handleCheckboxChange}
                     onClick={(e) => e.stopPropagation()}
+                    disabled={!isPermitidoEditar}
                 />
                 <div className="flex-grow">
                     <h2 className="text-lg font-semibold">{titulo}</h2>
@@ -82,10 +85,14 @@ export default function Tarefa({
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: prioridadeCor }}></div>
                     <span className="text-sm font-medium">{prioridadeNome}</span>
                 </div>
+                {
+                    isPermitidoEditar && (
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onExcluir(); }}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    )
+                }
 
-                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onExcluir(); }}>
-                    <Trash2 className="h-4 w-4" />
-                </Button>
             </div>
         </div>
     );
