@@ -151,7 +151,6 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
                 )}
             </main>
 
-            {/* Alert Dialog for Delete Confirmation */}
             <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>

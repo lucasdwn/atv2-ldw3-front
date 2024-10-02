@@ -32,6 +32,7 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
     const [podeEditar, setPodeEditar] = useState<boolean>(false);
     const router = useRouter();
     const { toast } = useToast();
+    const [isEditingUsers, setIsEditingUsers] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchTipoListas = async () => {
@@ -62,6 +63,8 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
                     }
                     setPersonalizacao(lista.personalizacao);
                     setUsuariosPermitidos(lista.usuariosPermitidos || []);
+                    console.log(lista)
+                    setIsEditingUsers(lista.isEditUsuarios || false);
                 } catch (error: any) {
                     toast({
                         title: `${error.message}`,
@@ -104,8 +107,11 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
             const novaLista: ILista = {
                 nome,
                 tipoListaId,
-                personalizacao,
-                usuariosPermitidos,
+                personalizacao
+            };
+
+            if (!isEditing || isEditingUsers) {
+                novaLista.usuariosPermitidos = usuariosPermitidos;
             };
 
             if (isEditing) {
@@ -124,7 +130,7 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
                 });
             }
 
-            router.push('/listas/minhasListas');
+            router.back()
         } catch (error: any) {
             toast({
                 title: `${error.message}`,
@@ -196,31 +202,36 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
                 </div>
 
                 <div className="space-y-2 ">
-                    <Label htmlFor="email">Adicionar Usuário Permitido</Label>
-                    <div className="flex flex-col md:flex-row items-center gap-2">
-                        <Input
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Digite o e-mail"
-                        />
-                        <div className="flex items-center justify-between w-full md:w-auto md:justify-normal">
-                            <div className='flex items-center space-x-2'>
-                                <Checkbox
-                                    id="podeEditar"
-                                    checked={podeEditar}
-                                    onCheckedChange={(checked: CheckedState) => setPodeEditar(checked === true)}
-                                />
-                                <label htmlFor="podeEditar" className="text-sm font-medium leading-none">
-                                    Pode editar
-                                </label>
-                            </div>
-                            <Button onClick={handleAddUsuario} className="ml-2">Adicionar</Button>
-                        </div>
-                    </div>
-
                     {
-                        usuariosPermitidos && usuariosPermitidos.length > 0 &&  (
+                        !isEditing || isEditingUsers && (
+                            <div>
+                                <Label htmlFor="email">Adicionar Usuário Permitido</Label>
+                                <div className="flex flex-col md:flex-row items-center gap-2">
+                                    <Input
+                                        id="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="Digite o e-mail"
+                                    />
+                                    <div className="flex items-center justify-between w-full md:w-auto md:justify-normal">
+                                        <div className='flex items-center space-x-2'>
+                                            <Checkbox
+                                                id="podeEditar"
+                                                checked={podeEditar}
+                                                onCheckedChange={(checked: CheckedState) => setPodeEditar(checked === true)}
+                                            />
+                                            <label htmlFor="podeEditar" className="text-sm font-medium leading-none">
+                                                Pode editar
+                                            </label>
+                                        </div>
+                                        <Button onClick={handleAddUsuario} className="ml-2">Adicionar</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
+                    {
+                        usuariosPermitidos && usuariosPermitidos.length > 0 && (
                             <div className='rounded-lg shadow-lg border border-gray-400 p-4'>
                                 <div className='border-b border-gray-400 mb-2'>
                                     <span className='text-md font-semibold'>Usuários Permitidos:</span>
@@ -232,16 +243,19 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
                                                 <span><span className=''>Email:</span> {usuario.email}</span>
                                                 <span><span className=''>Edição:</span> {usuario.podeEditar ? "Permitido" : "Não Permitido"}</span>
                                             </div>
-                                            <div>
-                                                <Button variant="destructive" onClick={() => handleRemoveUsuario(usuario.email)}>Remover</Button>
-                                            </div>
+                                            {
+                                                !isEditing || isEditingUsers && (
+                                                    <div>
+                                                        <Button variant="destructive" onClick={() => handleRemoveUsuario(usuario.email)}>Remover</Button>
+                                                    </div>
+                                                )
+                                            }
                                         </li>
                                     ))}
                                 </ul>
                             </div>
                         )
                     }
-
                 </div>
             </CardContent>
             <CardFooter className="flex justify-between">
