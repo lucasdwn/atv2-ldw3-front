@@ -111,11 +111,6 @@ export default function ProfilePage() {
                 };
                 setUserData(userData);
                 setOriginalUserData(userData);
-                toast({
-                    title: "Sucesso",
-                    description: "Usuario editado com sucesso!",
-                    variant: "default",
-                });
             }
         } catch (error: any) {
             toast({

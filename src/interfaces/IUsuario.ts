@@ -9,7 +9,7 @@ export interface IUsuario {
 }
 
 export interface IUsuarioPermitido {
-    usuarioId: string;
+    email: string;
     podeEditar: boolean;
     criadoEm?: Date;
     atualizadoEm?: Date;

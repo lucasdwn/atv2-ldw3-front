@@ -12,6 +12,9 @@ import { ILista } from '@/interfaces/ILista';
 import { ITipoLista } from '@/interfaces/ITipoLista';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { EmojiPickerComponent } from '@/components/emojiPicker';
+import { IUsuarioPermitido } from '@/interfaces/IUsuario';
+import { Checkbox } from '../ui/checkbox';
+import { CheckedState } from '@radix-ui/react-checkbox';
 
 interface ListaFormProps {
     listaId?: string;
@@ -24,6 +27,9 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
     const [tipoListas, setTipoListas] = useState<ITipoLista[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [isEditing, setIsEditing] = useState<boolean>(!!listaId);
+    const [usuariosPermitidos, setUsuariosPermitidos] = useState<IUsuarioPermitido[]>([]);
+    const [email, setEmail] = useState<string>('');
+    const [podeEditar, setPodeEditar] = useState<boolean>(false);
     const router = useRouter();
     const { toast } = useToast();
 
@@ -55,6 +61,7 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
                         setTipoListaId(lista.tipoListaId.id ?? "");
                     }
                     setPersonalizacao(lista.personalizacao);
+                    setUsuariosPermitidos(lista.usuariosPermitidos || []);
                 } catch (error: any) {
                     toast({
                         title: `${error.message}`,
@@ -67,12 +74,38 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
         }
     }, [isEditing, listaId]);
 
+    const handleAddUsuario = () => {
+        if (email.trim() === "") return;
+
+        const usuarioExistente = usuariosPermitidos.find(usuario => usuario.email === email);
+        if (usuarioExistente) {
+            toast({
+                title: "E-mail já adicionado",
+                description: "Esse e-mail já está na lista de usuários permitidos.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setUsuariosPermitidos((prev) => [
+            ...prev,
+            { email, podeEditar, criadoEm: new Date(), atualizadoEm: new Date() },
+        ]);
+        setEmail('');
+        setPodeEditar(false);
+    };
+
+    const handleRemoveUsuario = (emailToRemove: string) => {
+        setUsuariosPermitidos((prev) => prev.filter(usuario => usuario.email !== emailToRemove));
+    };
+
     const handleSubmit = async () => {
         try {
             const novaLista: ILista = {
                 nome,
                 tipoListaId,
                 personalizacao,
+                usuariosPermitidos,
             };
 
             if (isEditing) {
@@ -160,6 +193,55 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
                             className="w-24 h-10 p-1 rounded"
                         />
                     </div>
+                </div>
+
+                <div className="space-y-2 ">
+                    <Label htmlFor="email">Adicionar Usuário Permitido</Label>
+                    <div className="flex flex-col md:flex-row items-center gap-2">
+                        <Input
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Digite o e-mail"
+                        />
+                        <div className="flex items-center justify-between w-full md:w-auto md:justify-normal">
+                            <div className='flex items-center space-x-2'>
+                                <Checkbox
+                                    id="podeEditar"
+                                    checked={podeEditar}
+                                    onCheckedChange={(checked: CheckedState) => setPodeEditar(checked === true)}
+                                />
+                                <label htmlFor="podeEditar" className="text-sm font-medium leading-none">
+                                    Pode editar
+                                </label>
+                            </div>
+                            <Button onClick={handleAddUsuario} className="ml-2">Adicionar</Button>
+                        </div>
+                    </div>
+
+                    {
+                        usuariosPermitidos && usuariosPermitidos.length > 0 &&  (
+                            <div className='rounded-lg shadow-lg border border-gray-400 p-4'>
+                                <div className='border-b border-gray-400 mb-2'>
+                                    <span className='text-md font-semibold'>Usuários Permitidos:</span>
+                                </div>
+                                <ul className='flex flex-col gap-2'>
+                                    {usuariosPermitidos.map((usuario, index) => (
+                                        <li key={index} className="flex justify-between items-center">
+                                            <div className='flex flex-col md:flex-row space-x-0 md:space-x-2 p-2'>
+                                                <span><span className='font-medium'>Email:</span> {usuario.email}</span>
+                                                <span><span className='font-medium'>Edição:</span> {usuario.podeEditar ? "Permitido" : "Não Permitido"}</span>
+                                            </div>
+                                            <div>
+                                                <Button variant="destructive" onClick={() => handleRemoveUsuario(usuario.email)}>Remover</Button>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )
+                    }
+
                 </div>
             </CardContent>
             <CardFooter className="flex justify-between">
