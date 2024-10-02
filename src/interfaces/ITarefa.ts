@@ -32,3 +32,8 @@ export interface IOrdenacao {
     id: string;
     ordenacao: number;
 }
+
+export interface IRealizadoEm {
+    id: string;
+    realizadoEm: Date | null;
+}

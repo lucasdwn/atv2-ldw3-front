@@ -10,10 +10,11 @@ import { listService } from '@/services/listService';
 import { SquarePen } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { IOrdenacao, ITarefa } from '@/interfaces/ITarefa';
+import { IOrdenacao, IRealizadoEm, ITarefa } from '@/interfaces/ITarefa';
 import { StatusEnum } from '@/enums/tarefasEnum';
 import Loading from '@/components/loading';
 import { taskService } from '@/services/taskService';
+import dateService from '@/utils/dateService';
 
 export default function VisualizarLista() {
     const { listaId } = useParams() as { listaId: string };
@@ -59,23 +60,40 @@ export default function VisualizarLista() {
         }
     };
 
+    const retornarStatus = (data: Date) => {
+        const dataDeVencimento = dateService.getDataSemHoras(new Date(data));
+        const dataAtual = dateService.getDataSemHoras(dateService.getServiceDate());
+
+        if (dataDeVencimento.getTime() < dataAtual.getTime()) {
+            return StatusEnum.Atrasada;
+        } else {
+            return StatusEnum.Pendente;
+        }
+    }
+
     const handleToggleComplete = async (id: string, isCompleted: boolean) => {
         const updatedTarefas = tarefas.map((tarefa: ITarefa) =>
             tarefa.id === id
-                ? { ...tarefa, status: isCompleted ? StatusEnum.Concluida : StatusEnum.Pendente }
+                ? { ...tarefa, status: isCompleted ? StatusEnum.Concluida : retornarStatus(tarefa.dataDeVencimento) }
                 : tarefa
         );
         setTarefas(updatedTarefas);
-        // Atualizar no backend
-        // try {
-        //     await listService.updateTaskStatus(id, isCompleted);
-        // } catch (error: any) {
-        //     toast({
-        //         title: 'Erro ao atualizar tarefa',
-        //         description: error.message,
-        //         variant: 'destructive',
-        //     });
-        // }
+
+
+
+        const realizadoEm: IRealizadoEm = {
+            id: id,
+            realizadoEm: (isCompleted ? dateService.getServiceDate() : null)
+        }
+        try {
+            await taskService.atualizarRealizadoEm(listaId, realizadoEm);
+        } catch (error: any) {
+            toast({
+                title: error.message,
+                description: error.error,
+                variant: 'destructive',
+            });
+        }
     };
 
     const handleExcluir = async (id: string) => {
