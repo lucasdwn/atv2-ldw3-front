@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import useTarefa from '@/hooks/useTarefa';
 import { ITipoLista } from '@/interfaces/ITipoLista';
 import { listService } from '@/services/listService';
-import { SquarePen } from 'lucide-react';
+import { Plus, SquarePen } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { IOrdenacao, IRealizadoEm, ITarefa } from '@/interfaces/ITarefa';
@@ -190,6 +190,12 @@ export default function VisualizarLista() {
                             Editar lista
                         </Button>
                     </div>
+                </div>
+                <div>
+                    <Button onClick={() => router.push(`/listas/lista/${listaId}/tarefa/novaTarefa`)}>
+                        <Plus className="mr-2" />
+                        Nova tarefa
+                    </Button>
                 </div>
             </header>
             <DragDropContext onDragEnd={onDragEnd}>
