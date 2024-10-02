@@ -15,6 +15,17 @@ import { StatusEnum } from '@/enums/tarefasEnum';
 import Loading from '@/components/loading';
 import { taskService } from '@/services/taskService';
 import dateService from '@/utils/dateService';
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogFooter,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogAction,
+    AlertDialogCancel
+} from "@/components/ui/alert-dialog";
 
 export default function VisualizarLista() {
     const { listaId } = useParams() as { listaId: string };
@@ -26,6 +37,8 @@ export default function VisualizarLista() {
     const { tarefas: initialTarefas, loading, refetch } = useTarefa(listaId);
     const [tarefas, setTarefas] = useState<ITarefa[]>([]);
     const [isPermitidoEditar, setIsPermitidoEditar] = useState<boolean>(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
     useEffect(() => {
         if (initialTarefas) {
@@ -99,16 +112,33 @@ export default function VisualizarLista() {
     const handleExcluir = async (id: string) => {
         const updatedTarefas = tarefas.filter(tarefa => tarefa.id !== id);
         setTarefas(updatedTarefas);
-        // Excluir no backend
-        // try {
-        //     await listService.deleteTask(id);
-        // } catch (error: any) {
-        //     toast({
-        //         title: 'Erro ao excluir tarefa',
-        //         description: error.message,
-        //         variant: 'destructive',
-        //     });
-        // }
+        try {
+            await taskService.deleteTarefa(listaId, id);
+            toast({
+                title: "Sucesso",
+                description: "Tarefa removida com sucesso!",
+                variant: "default",
+            });
+        } catch (error: any) {
+            toast({
+                title: error.message,
+                description: error.error,
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const confirmDelete = () => {
+        if (taskToDelete) {
+            handleExcluir(taskToDelete);
+            setTaskToDelete(null);
+            setIsDialogOpen(false);
+        }
+    };
+
+    const openDialog = (taskId: string) => {
+        setTaskToDelete(taskId);
+        setIsDialogOpen(true);
     };
 
     const fetchLista = async () => {
@@ -180,7 +210,7 @@ export default function VisualizarLista() {
                                             <Tarefa
                                                 tarefa={tarefa}
                                                 prioridade={tarefa.prioridadeId}
-                                                onExcluir={() => handleExcluir(tarefa.id ?? "")}
+                                                onExcluir={() => openDialog(tarefa.id ?? "")}
                                                 onToggleComplete={handleToggleComplete}
                                                 onClick={() => router.push(`/listas/lista/${listaId}/tarefa/${tarefa.id}`)}
                                                 isPermitidoEditar={isPermitidoEditar}
@@ -194,6 +224,20 @@ export default function VisualizarLista() {
                     )}
                 </Droppable>
             </DragDropContext>
+            <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmar Remoção</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Você realmente deseja remover essa tarefa?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setIsDialogOpen(false)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete}>Confirmar</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
