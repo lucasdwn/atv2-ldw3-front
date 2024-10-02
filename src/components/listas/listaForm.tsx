@@ -63,7 +63,6 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
                     }
                     setPersonalizacao(lista.personalizacao);
                     setUsuariosPermitidos(lista.usuariosPermitidos || []);
-                    console.log(lista)
                     setIsEditingUsers(lista.isEditUsuarios || false);
                 } catch (error: any) {
                     toast({

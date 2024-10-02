@@ -1,8 +1,10 @@
 'use client';
 
 import Loading from '@/components/loading';
+import Tarefa from '@/components/tarefas/task-item';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import useTarefa from '@/hooks/useTarefa';
 import { ITipoLista } from '@/interfaces/ITipoLista';
 import { listService } from '@/services/listService';
 import { SquarePen } from 'lucide-react';
@@ -16,6 +18,7 @@ export default function VisualizarLista() {
     const [tipoLista, setTipoLista] = useState<ITipoLista>({ nome: '' });
     const { toast } = useToast();
     const router = useRouter();
+    const { tarefas, loading, refetch } = useTarefa(listaId);
 
     if (!listaId) return <Loading />;
 
@@ -23,7 +26,6 @@ export default function VisualizarLista() {
         try {
             const lista = await listService.buscarLista(listaId);
             setNome(lista.nome);
-            console.log(lista)
             if (typeof lista.tipoListaId === 'string') {
             } else if (lista.tipoListaId && 'id' in lista.tipoListaId) {
                 setTipoLista(lista.tipoListaId);
@@ -40,6 +42,7 @@ export default function VisualizarLista() {
 
     useEffect(() => {
         fetchLista();
+        refetch();
     }, []);
 
     return (
@@ -68,7 +71,24 @@ export default function VisualizarLista() {
                 </div>
             </header>
             <main>
+                {
+                    tarefas && tarefas.length > 0 ? (
+                        <div>
+                            {
+                                tarefas.map((tarefa) => (
+                                    <Tarefa
+                                        key={tarefa.id}
+                                        tarefa={tarefa}
+                                        prioridade={tarefa.prioridadeId}
+                                        onEditar={() => console.log('Editar tarefa')}
+                                        onExcluir={() => console.log('Excluir tarefa')}
+                                    />
+                                ))
+                            }
+                        </div>
 
+                    ) : ""
+                }
             </main>
         </div>
     );

@@ -4,6 +4,7 @@ import { IPrioridade } from "./IPrioridade";
 import { ILista } from "./ILista";
 
 export interface ITarefa {
+    id?: string;
     listaId: string | ILista;
     titulo: string;
     descricao: string;
