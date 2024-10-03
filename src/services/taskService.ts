@@ -22,4 +22,15 @@ export const taskService = {
             method: 'DELETE',
         });
     },
+
+    async getPrioridades(search?: string, limit?: number) {
+        const query = new URLSearchParams();
+        if (search) query.append('search', search);
+        if (limit) query.append('limit', String(limit));
+
+        return await apiService.makeRequest(`/prioridade/list?${query.toString()}`, {
+            method: 'GET',
+        });
+    },
+
 };

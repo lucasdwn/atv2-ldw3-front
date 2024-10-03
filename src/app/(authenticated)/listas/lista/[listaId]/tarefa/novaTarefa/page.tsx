@@ -1,9 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
-import { format } from 'date-fns'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -14,92 +13,143 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { GripVertical, NotepadText, Trash2, Paperclip } from 'lucide-react'
+import { taskService } from '@/services/taskService'
+import { IPrioridade } from '@/interfaces/IPrioridade'
+import { useToast } from '@/hooks/use-toast'
+import { StatusEnum } from '@/enums/tarefasEnum'
+import { Badge } from '@/components/ui/badge'
+import dateService from '@/utils/dateService'
+import { ISubTarefa } from '@/interfaces/ITarefa'
+import { IAnexo } from '@/interfaces/IAnexo'
 
-interface Subtask {
-    id: string
-    title: string
-    description: string
-    completed: boolean
-}
-
-interface Attachment {
-    id: string
-    name: string
-    url: string
-}
 
 export default function TaskForm() {
-    const [title, setTitle] = useState('')
-    const [priority, setPriority] = useState('')
-    const [dueDate, setDueDate] = useState('')
-    const [status, setStatus] = useState('')
-    const [description, setDescription] = useState('')
-    const [subtasks, setSubtasks] = useState<Subtask[]>([])
-    const [newSubtaskTitle, setNewSubtaskTitle] = useState('')
-    const [newSubtaskDescription, setNewSubtaskDescription] = useState('')
-    const [attachments, setAttachments] = useState<Attachment[]>([])
+    const { toast } = useToast();
     const router = useRouter()
 
-    const handleDueDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let value = e.target.value.replace(/\D/g, '')
-        if (value.length > 8) value = value.slice(0, 8)
-        if (value.length >= 4) {
-            value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`
-        } else if (value.length >= 2) {
-            value = `${value.slice(0, 2)}/${value.slice(2)}`
-        }
-        setDueDate(value)
-    }
+    const [status, setStatus] = useState<StatusEnum>(StatusEnum.Pendente);
 
-    const addSubtask = () => {
-        if (newSubtaskTitle.trim()) {
-            setSubtasks([
-                ...subtasks,
+    // Constantes de tarefa.
+    const [titulo, setTitulo] = useState('')
+    const [descricao, setDescricao] = useState('')
+    const [dataDeVencimento, setDataDeVencimento] = useState('')
+    const [realizadoEm, setRealizadoEm] = useState('')
+
+    // Constantes utilizadas em subtarefas
+    const [subTarefas, setSubTarefas] = useState<ISubTarefa[]>([]);
+    const [newSubTarefaTitulo, setnewSubTarefaTitulo] = useState('')
+    const [newSubTarefaDescricao, setNewSubTarefaDescricao] = useState('')
+
+    // Constantes utilizadas em prioridades
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [prioridades, setPrioridades] = useState<IPrioridade[]>([]);
+    const [prioridadeId, setPrioridadeId] = useState<string>('');
+
+    // Constantes utilizadas em uploads
+    const [anexos, setAnexos] = useState<IAnexo[]>([])
+
+
+
+
+    const statusStyle = (status === StatusEnum.Pendente ? "bg-yellow-100 text-yellow-800" : (status === StatusEnum.Concluida ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"));
+
+
+    useEffect(() => {
+        const fetchPrioridades = async () => {
+            try {
+                const prioridades = await taskService.getPrioridades(searchTerm);
+                setPrioridades(prioridades);
+            } catch (error: any) {
+                toast({
+                    title: `${error.message}`,
+                    description: `${error.error}`,
+                    variant: "destructive",
+                });
+            }
+        };
+        fetchPrioridades();
+    }, [searchTerm]);
+
+    useEffect(() => {
+        if (realizadoEm !== null && realizadoEm !== '') {
+            setStatus(StatusEnum.Concluida);
+        }
+        else {
+            atualizarStatus();
+        }
+    }, [realizadoEm])
+
+    useEffect(() => {
+        atualizarStatus();
+    }, [dataDeVencimento])
+
+    const atualizarStatus = () => {
+        if (!realizadoEm) {
+            const dataVencimento = dateService.getDataSemHoras(new Date(dataDeVencimento + 'T00:00:00'));
+            const dataAtual = dateService.getDataSemHoras(dateService.getServiceDate());
+            if (dataVencimento.getTime() < dataAtual.getTime()) {
+                setStatus(StatusEnum.Atrasada);
+            } else {
+                setStatus(StatusEnum.Pendente);
+            }
+        } else {
+            setStatus(StatusEnum.Concluida);
+        }
+    };
+
+    const addSubTarefa = () => {
+        if (newSubTarefaTitulo.trim()) {
+            setSubTarefas([
+                ...subTarefas,
                 {
                     id: Date.now().toString(),
-                    title: newSubtaskTitle,
-                    description: newSubtaskDescription,
-                    completed: false
+                    titulo: newSubTarefaTitulo,
+                    descricao: newSubTarefaDescricao,
+                    isFinalizada: false
                 }
             ])
-            setNewSubtaskTitle('')
-            setNewSubtaskDescription('')
+            setnewSubTarefaTitulo('')
+            setNewSubTarefaDescricao('')
         }
     }
 
-    const removeSubtask = (id: string) => {
-        setSubtasks(subtasks.filter(subtask => subtask.id !== id))
+    const removeSubTarefa = (id: string) => {
+        setSubTarefas(subTarefas.filter(subTarefa => subTarefa.id !== id))
     }
 
-    const onDragEnd = (result: any) => {
+
+
+    const onDragEndSubTarefa = (result: any) => {
         if (!result.destination) return
-        const items = Array.from(subtasks)
+        const items = Array.from(subTarefas)
         const [reorderedItem] = items.splice(result.source.index, 1)
         items.splice(result.destination.index, 0, reorderedItem)
-        setSubtasks(items)
+        setSubTarefas(items)
     }
+
+
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
         if (files) {
-            const newAttachments = Array.from(files).map(file => ({
+            const novosAnexos: IAnexo[] = Array.from(files).map(file => ({
                 id: Date.now().toString(),
-                name: file.name,
+                criadoEm: new Date(),
+                originalFilename: file.name,
                 url: URL.createObjectURL(file)
             }))
-            setAttachments([...attachments, ...newAttachments])
+            setAnexos([...anexos, ...novosAnexos])
         }
     }
 
     const removeAttachment = (id: string) => {
-        setAttachments(attachments.filter(attachment => attachment.id !== id))
+        setAnexos(anexos.filter(anexo => anexo.id !== id))
     }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        // Handle form submission logic here
-        console.log({ title, priority, dueDate, status, description, subtasks, attachments })
-        router.back()
+        console.log({ titulo, prioridadeId, dataDeVencimento, realizadoEm, status, descricao, subTarefas, anexos })
+        router.back();
     }
 
     return (
@@ -108,56 +158,76 @@ export default function TaskForm() {
                 <CardContent className="space-y-6 pt-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="title">Título</Label>
+                            <Label htmlFor="titulo">Título</Label>
                             <Input
-                                id="title"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
+                                id="titulo"
+                                value={titulo}
+                                onChange={(e) => setTitulo(e.target.value)}
                                 placeholder="Digite o título da tarefa"
                             />
                         </div>
+
                         <div className="space-y-2">
-                            <Label htmlFor="priority">Prioridade</Label>
-                            <Select onValueChange={setPriority} value={priority}>
+                            <Label htmlFor="prioridade">Prioridade</Label>
+                            <Select onValueChange={(value) => setPrioridadeId(value)} value={prioridadeId}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecione a prioridade" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="low">Baixa</SelectItem>
-                                    <SelectItem value="medium">Média</SelectItem>
-                                    <SelectItem value="high">Alta</SelectItem>
+                                    <Input
+                                        id="searchPrioridades"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        placeholder="Digite para buscar as prioridades"
+                                    />
+                                    {prioridades.map(prioridade => (
+                                        <SelectItem key={prioridade.id} value={prioridade.id ?? ""}>
+                                            <span className="flex items-center">
+                                                <span className="mr-2">{prioridade.personalizacao?.icone}</span>
+                                                <span className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: prioridade.personalizacao?.cor }}></span>
+                                                {prioridade.nome}
+                                            </span>
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="dueDate">Data de Vencimento</Label>
+                            <Label htmlFor="dataDeVencimento">Data de Vencimento</Label>
                             <Input
-                                id="dueDate"
-                                value={dueDate}
-                                onChange={handleDueDateChange}
-                                placeholder="DD/MM/AAAA"
+                                type='date'
+                                id="dataDeVencimento"
+                                value={dataDeVencimento}
+                                onChange={(e) => setDataDeVencimento(e.target.value)}
+                            />
+
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="realizadoEm">RealizadoEm</Label>
+                            <Input
+                                type='date'
+                                id="realizadoEm"
+                                value={realizadoEm}
+                                onChange={(e) => setRealizadoEm(e.target.value)}
                             />
                         </div>
+                    </div>
+                    <div>
                         <div className="space-y-2">
                             <Label htmlFor="status">Status</Label>
-                            <Select onValueChange={setStatus} value={status}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="todo">A fazer</SelectItem>
-                                    <SelectItem value="inProgress">Em progresso</SelectItem>
-                                    <SelectItem value="done">Concluído</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <div>
+                                <Badge variant="secondary" className={statusStyle}>
+                                    {status}
+                                </Badge>
+                            </div>
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="description">Descrição</Label>
+                        <Label htmlFor="descricao">Descrição</Label>
                         <Textarea
-                            id="description"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            id="descricao"
+                            value={descricao}
+                            onChange={(e) => setDescricao(e.target.value)}
                             placeholder="Digite a descrição da tarefa"
                             rows={4}
                         />
@@ -166,24 +236,24 @@ export default function TaskForm() {
                         <Label>Subtarefas</Label>
                         <div className="flex flex-col md:flex-row gap-2">
                             <Input
-                                value={newSubtaskTitle}
-                                onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                                value={newSubTarefaTitulo}
+                                onChange={(e) => setnewSubTarefaTitulo(e.target.value)}
                                 placeholder="Título da subtarefa"
                             />
                             <Input
-                                value={newSubtaskDescription}
-                                onChange={(e) => setNewSubtaskDescription(e.target.value)}
+                                value={newSubTarefaDescricao}
+                                onChange={(e) => setNewSubTarefaDescricao(e.target.value)}
                                 placeholder="Descrição da subtarefa"
                             />
-                            <Button type="button" onClick={addSubtask}>Adicionar</Button>
+                            <Button type="button" onClick={addSubTarefa}>Adicionar</Button>
                         </div>
                         <div className="border rounded-md p-4 max-h-60 overflow-y-auto">
-                            <DragDropContext onDragEnd={onDragEnd}>
-                                <Droppable droppableId="subtasks">
+                            <DragDropContext onDragEnd={onDragEndSubTarefa}>
+                                <Droppable droppableId="subtarefas">
                                     {(provided) => (
                                         <ul {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
-                                            {subtasks.map((subtask, index) => (
-                                                <Draggable key={subtask.id} draggableId={subtask.id} index={index}>
+                                            {subTarefas.map((subtarefa, index) => (
+                                                <Draggable key={subtarefa.id} draggableId={subtarefa.id ?? ""} index={index}>
                                                     {(provided) => (
                                                         <li
                                                             ref={provided.innerRef}
@@ -194,29 +264,29 @@ export default function TaskForm() {
                                                                 <GripVertical className="text-muted-foreground" />
                                                             </span>
                                                             <Checkbox
-                                                                checked={subtask.completed}
+                                                                checked={subtarefa.isFinalizada}
                                                                 onCheckedChange={(checked) => {
-                                                                    const updatedSubtasks = subtasks.map(st =>
-                                                                        st.id === subtask.id ? { ...st, completed: checked === true } : st
+                                                                    const updateSubtarefas = subTarefas.map(st =>
+                                                                        st.id === subtarefa.id ? { ...st, isFinalizada: checked === true } : st
                                                                     )
-                                                                    setSubtasks(updatedSubtasks)
+                                                                    setSubTarefas(updateSubtarefas)
                                                                 }}
                                                             />
-                                                            <span className="flex-grow">{subtask.title}</span>
+                                                            <span className="flex-grow">{subtarefa.titulo}</span>
                                                             <TooltipProvider>
                                                                 <Tooltip>
                                                                     <TooltipTrigger>
                                                                         <NotepadText className="text-muted-foreground" />
                                                                     </TooltipTrigger>
                                                                     <TooltipContent>
-                                                                        <p>{subtask.description}</p>
+                                                                        <p>{subtarefa.descricao}</p>
                                                                     </TooltipContent>
                                                                 </Tooltip>
                                                             </TooltipProvider>
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                onClick={() => removeSubtask(subtask.id)}
+                                                                onClick={() => removeSubTarefa(subtarefa.id ?? "")}
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
                                                             </Button>
@@ -250,15 +320,15 @@ export default function TaskForm() {
                                         multiple
                                     />
                                     <div className="max-h-[200px] overflow-y-auto">
-                                        {attachments.map(attachment => (
-                                            <div key={attachment.id} className="flex items-center justify-between p-2 border-b">
-                                                <a href={attachment.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                                                    {attachment.name}
+                                        {anexos.map(anexo => (
+                                            <div key={anexo.id} className="flex items-center justify-between p-2 border-b">
+                                                <a href={anexo.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                                                    {anexo.originalFilename}
                                                 </a>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => removeAttachment(attachment.id)}
+                                                    onClick={() => removeAttachment(anexo.id ?? "")}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>

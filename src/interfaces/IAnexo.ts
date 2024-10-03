@@ -1,6 +1,6 @@
 export interface IAnexo {
     id?: string;
-    usuarioId: string;
+    usuarioId?: string;
     tarefaId?: string;
     url: string;
     originalFilename: string;
