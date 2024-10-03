@@ -161,10 +161,11 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                     const tarefa = await taskService.buscarTarefa(listaId, tarefaId);
                     setTitulo(tarefa.titulo);
                     setDescricao(tarefa.descricao);
-                    setDataDeVencimento(tarefa.dataDeVencimento.toString());
+
+                    setDataDeVencimento(dateService.formatDateForInput(tarefa.dataDeVencimento.toString()));
 
                     if (tarefa.realizadoEm) {
-                        setRealizadoEm(tarefa.realizadoEm.toString());
+                        setRealizadoEm(dateService.formatDateForInput(tarefa.realizadoEm.toString()));
                     }
                     if (tarefa.subTarefas) {
                         setSubTarefas(tarefa.subTarefas);

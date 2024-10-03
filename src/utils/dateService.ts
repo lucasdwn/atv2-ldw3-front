@@ -23,6 +23,11 @@ class DataService {
 
         return `${dia}/${mes}/${ano}`;
     };
+
+    formatDateForInput(dateString: string) {
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+    };
 }
 
 export default new DataService();
