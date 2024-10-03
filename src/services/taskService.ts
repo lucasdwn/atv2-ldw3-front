@@ -33,4 +33,23 @@ export const taskService = {
         });
     },
 
+    async createTarefa(listaId: string, tarefa: ITarefa): Promise<ITarefa> {
+        return await apiService.makeRequest(`/tarefa?listaId=${listaId}`, {
+            method: 'POST',
+            body: JSON.stringify(tarefa),
+        });
+    },
+
+    async buscarTarefa(listaId: string, tarefaId: string): Promise<ITarefa> {
+        return await apiService.makeRequest(`/tarefa/getTarefa/${tarefaId}?listaId=${listaId}`, {
+            method: 'GET',
+        });
+    },
+
+    async updateTarefa(listaId: string, tarefaId: string, tarefa: ITarefa): Promise<ITarefa> {
+        return await apiService.makeRequest(`/tarefa/update/${tarefaId}?listaId=${listaId}`, {
+            method: 'PUT',
+            body: JSON.stringify(tarefa),
+        });
+    },
 };

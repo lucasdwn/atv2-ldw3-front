@@ -1,6 +1,7 @@
 'use client';
 
 import Loading from "@/components/loading";
+import { TaskForm } from "@/components/tarefas/taskForm";
 import { useParams } from "next/navigation";
 
 export default function TarefaPage() {
@@ -8,9 +9,5 @@ export default function TarefaPage() {
 
     if (!tarefaId) return <Loading />;
 
-    return (
-        <div>
-            <h1>Tarefa {tarefaId}</h1>
-        </div>
-    );
+    return <TaskForm tarefaId={tarefaId}/>
 }

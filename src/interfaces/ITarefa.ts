@@ -5,7 +5,7 @@ import { ILista } from "./ILista";
 
 export interface ITarefa {
     id?: string;
-    listaId: string | ILista;
+    listaId?: string | ILista;
     titulo: string;
     descricao: string;
     ordenacao?: number;
