@@ -95,7 +95,7 @@ export const taskService = {
     },
 
     async deletePrioridade(prioridadeId: string): Promise<IPrioridade> {
-        return await apiService.makeRequest(`/tipoLista/delete/${prioridadeId}`, {
+        return await apiService.makeRequest(`/prioridade/delete/${prioridadeId}`, {
             method: 'DELETE',
         });
     },
