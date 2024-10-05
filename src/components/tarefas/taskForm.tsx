@@ -23,6 +23,7 @@ import { ISubTarefa, ITarefa } from '@/interfaces/ITarefa'
 import { IAnexo, IResponseAnexo } from '@/interfaces/IAnexo'
 import { v4 as uuidv4 } from 'uuid';
 import Link from 'next/link'
+import Loading from '../loading'
 
 interface TarefaFormProps {
     tarefaId?: string;
@@ -61,7 +62,10 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
     const [isEditing, setIsEditing] = useState<boolean>(!!tarefaId);
 
     // Contantes para permissoes de usuario.
-    const [isPermitidoEditar, setIsPermitidoEditar] = useState<boolean>(false);
+    const [isPermitidoEditar, setIsPermitidoEditar] = useState<boolean>(true);
+
+    // Implementando loaddings 
+    const [isFetching, setIsFetching] = useState<boolean>(false);
 
 
 
@@ -71,7 +75,8 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
     useEffect(() => {
         const fetchPrioridades = async () => {
             try {
-                const prioridades = await taskService.getPrioridades(searchTerm);
+                const idTarefa = (tarefaId ? tarefaId : '');
+                const prioridades = await taskService.getPrioridades(idTarefa, searchTerm);
                 setPrioridades(prioridades);
             } catch (error: any) {
                 toast({
@@ -170,6 +175,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
 
     useEffect(() => {
         if (isEditing && tarefaId) {
+            setIsFetching(true);
             const fetchLista = async () => {
                 try {
                     const tarefa = await taskService.buscarTarefa(listaId, tarefaId);
@@ -199,6 +205,9 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                         description: `${error.error}`,
                         variant: "destructive",
                     });
+                }
+                finally {
+                    setIsFetching(false)
                 }
             };
             fetchLista();
@@ -305,6 +314,8 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
             });
         }
     };
+
+    if (isFetching) return <Loading />;
 
     return (
         <Card className="w-full max-w-4xl mx-auto">

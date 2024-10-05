@@ -191,12 +191,16 @@ export default function VisualizarLista() {
                         </Button>
                     </div>
                 </div>
-                <div>
-                    <Button onClick={() => router.push(`/listas/lista/${listaId}/tarefa/novaTarefa`)}>
-                        <Plus className="mr-2" />
-                        Nova tarefa
-                    </Button>
-                </div>
+                {
+                    isPermitidoEditar && (
+                        <div>
+                            <Button onClick={() => router.push(`/listas/lista/${listaId}/tarefa/novaTarefa`)}>
+                                <Plus className="mr-2" />
+                                Nova tarefa
+                            </Button>
+                        </div>
+                    )
+                }
             </header>
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="droppable">

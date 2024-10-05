@@ -10,10 +10,11 @@ export const listService = {
         });
     },
 
-    async getTipoListas(search?: string, limit?: number) {
+    async getTipoListas(listaId: string, search?: string, limit?: number) {
         const query = new URLSearchParams();
         if (search) query.append('search', search);
         if (limit) query.append('limit', String(limit));
+        query.append('listaId', listaId);
 
         return await apiService.makeRequest(`/tipoLista/list?${query.toString()}`, {
             method: 'GET',

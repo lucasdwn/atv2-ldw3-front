@@ -37,7 +37,8 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
     useEffect(() => {
         const fetchTipoListas = async () => {
             try {
-                const tipos = await listService.getTipoListas(searchTerm);
+                const idLista = (listaId ? listaId : '');
+                const tipos = await listService.getTipoListas(idLista, searchTerm);
                 setTipoListas(tipos);
             } catch (error: any) {
                 toast({

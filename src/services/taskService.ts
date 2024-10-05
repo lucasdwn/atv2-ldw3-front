@@ -25,10 +25,11 @@ export const taskService = {
         });
     },
 
-    async getPrioridades(search?: string, limit?: number) {
+    async getPrioridades(tarefaId: string, search?: string, limit?: number,) {
         const query = new URLSearchParams();
         if (search) query.append('search', search);
         if (limit) query.append('limit', String(limit));
+        query.append('tarefaId', tarefaId);
 
         return await apiService.makeRequest(`/prioridade/list?${query.toString()}`, {
             method: 'GET',
