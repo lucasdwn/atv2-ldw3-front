@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 
-const tiposListas: React.FC = () => {
+export default function TiposListas() {
     const { toast } = useToast();
     const itemsPerPage = 10;
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -159,5 +159,3 @@ const tiposListas: React.FC = () => {
         </>
     )
 };
-
-export default tiposListas;
