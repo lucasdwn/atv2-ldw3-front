@@ -1,6 +1,8 @@
 'use client';
+import { IAnexo, IResponseAnexo } from '@/interfaces/IAnexo';
 import { apiService } from './apiService';
 import { IOrdenacao, IRealizadoEm, ITarefa } from '@/interfaces/ITarefa';
+import { FORMERR } from 'dns';
 
 export const taskService = {
     async atualizarOrdenacao(listaId: string, ordenacao: IOrdenacao[]): Promise<ITarefa> {
@@ -50,6 +52,23 @@ export const taskService = {
         return await apiService.makeRequest(`/tarefa/update/${tarefaId}?listaId=${listaId}`, {
             method: 'PUT',
             body: JSON.stringify(tarefa),
+        });
+    },
+
+    async uploadDocumentos(uploads: File[], tarefaId?: string): Promise<IResponseAnexo> {
+        const formData = new FormData();
+
+        uploads.forEach((file, index) => {
+            formData.append('documents', file);
+        });
+
+        if (tarefaId) {
+            formData.append('tarefaId', tarefaId);
+        }
+
+        return await apiService.makeRequest(`/upload/documents`, {
+            method: 'POST',
+            body: formData,
         });
     },
 };

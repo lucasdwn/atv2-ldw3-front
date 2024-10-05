@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import { Input } from "@/components/ui/input"
@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { GripVertical, NotepadText, Trash2, Paperclip } from 'lucide-react'
+import { GripVertical, NotepadText, Trash2, Paperclip, FileDown } from 'lucide-react'
 import { taskService } from '@/services/taskService'
 import { IPrioridade } from '@/interfaces/IPrioridade'
 import { useToast } from '@/hooks/use-toast'
@@ -20,7 +20,9 @@ import { StatusEnum } from '@/enums/tarefasEnum'
 import { Badge } from '@/components/ui/badge'
 import dateService from '@/utils/dateService'
 import { ISubTarefa, ITarefa } from '@/interfaces/ITarefa'
-import { IAnexo } from '@/interfaces/IAnexo'
+import { IAnexo, IResponseAnexo } from '@/interfaces/IAnexo'
+import { v4 as uuidv4 } from 'uuid';
+import Link from 'next/link'
 
 interface TarefaFormProps {
     tarefaId?: string;
@@ -52,6 +54,8 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
 
     // Constantes utilizadas em uploads
     const [anexos, setAnexos] = useState<IAnexo[]>([])
+    const [anexosSalvos, setAnexosSalvos] = useState<IAnexo[]>([])
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     // Constantes uitilizadas para definir states de rota
     const [isEditing, setIsEditing] = useState<boolean>(!!tarefaId);
@@ -141,17 +145,25 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
         const files = e.target.files
         if (files) {
             const novosAnexos: IAnexo[] = Array.from(files).map(file => ({
-                id: Date.now().toString(),
+                id: uuidv4(),
                 criadoEm: new Date(),
                 originalFilename: file.name,
-                url: URL.createObjectURL(file)
+                url: URL.createObjectURL(file),
+                file: file
             }))
             setAnexos([...anexos, ...novosAnexos])
+        }
+        if (inputRef.current) {
+            inputRef.current.value = '';
         }
     }
 
     const removeAttachment = (id: string) => {
         setAnexos(anexos.filter(anexo => anexo.id !== id))
+    }
+
+    const removeAnexosSalvos = (id: string) => {
+        setAnexosSalvos(anexos.filter(anexo => anexo.id !== id));
     }
 
     useEffect(() => {
@@ -171,7 +183,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                         setSubTarefas(tarefa.subTarefas);
                     }
                     if (tarefa.anexos) {
-                        setAnexos(tarefa.anexos);
+                        setAnexosSalvos(tarefa.anexos);
                     }
 
                     if (typeof tarefa.prioridadeId === 'string') {
@@ -202,11 +214,14 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                 status,
                 dataDeVencimento: new Date(dataDeVencimento + 'T00:00:00'),
                 realizadoEm: new Date(realizadoEm + 'T00:00:00'),
-                subTarefas,
-                anexos
+                subTarefas
             }
 
             if (isEditing && tarefaId) {
+                if (anexosSalvos) {
+                    novaTarefa.anexos = anexosSalvos
+                }
+
                 await taskService.updateTarefa(listaId, tarefaId, novaTarefa);
                 toast({
                     title: "Sucesso",
@@ -215,6 +230,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                 });
             }
             else {
+                novaTarefa.anexos = anexosSalvos
                 await taskService.createTarefa(listaId, novaTarefa);
                 toast({
                     title: "Sucesso",
@@ -233,6 +249,60 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
             });
         }
     }
+
+    const handleSaveUploads = async () => {
+        if (anexos.length === 0) {
+            toast({
+                title: `Erro ao realizar upload`,
+                description: `Nenhum arquivo para enviar`,
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const files: File[] = [];
+
+        anexos.forEach((anexo, index) => {
+            if (anexo.file) {
+                files.push(anexo.file);
+            }
+        });
+
+        try {
+
+            if (isEditing && tarefaId) {
+                const response: IResponseAnexo = await taskService.uploadDocumentos(files, tarefaId);
+
+                setAnexos([])
+
+                if (response.anexos) {
+                    setAnexosSalvos([...anexosSalvos, ...response.anexos]);
+                }
+            }
+            else {
+                const response: IResponseAnexo = await taskService.uploadDocumentos(files);
+
+                setAnexos([])
+
+                if (response.anexos) {
+                    setAnexosSalvos([...anexosSalvos, ...response.anexos]);
+                }
+            }
+
+
+            toast({
+                title: "Sucesso",
+                description: "Upload(s) realizados com sucesso!",
+                variant: "default",
+            });
+        } catch (error: any) {
+            toast({
+                title: `${error.message}`,
+                description: `${error.error}`,
+                variant: "destructive",
+            });
+        }
+    };
 
     return (
         <Card className="w-full max-w-4xl mx-auto">
@@ -399,24 +469,91 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                                     <Input
                                         type="file"
                                         onChange={handleFileUpload}
+                                        ref={inputRef}
                                         multiple
                                     />
                                     <div className="max-h-[200px] overflow-y-auto">
-                                        {anexos.map(anexo => (
-                                            <div key={anexo.id} className="flex items-center justify-between p-2 border-b">
-                                                <a href={anexo.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                                                    {anexo.originalFilename}
-                                                </a>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => removeAttachment(anexo.id ?? "")}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        ))}
+                                        {
+                                            anexos.length > 0 && (
+                                                <div>
+                                                    <span className='flex border-b border-black'>Anexos pendentes.</span>
+                                                    {anexos.map(anexo => (
+                                                        <div key={anexo.id} className="flex items-center justify-between p-2 border-b">
+                                                            <a href={anexo.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                                                                {anexo.originalFilename}
+                                                            </a>
+
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => removeAttachment(anexo.id ?? "")}
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent side="right" align="center" className="ml-2">
+                                                                    <span>Remover</span>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )
+                                        }
+
+                                        {
+                                            anexosSalvos.length > 0 && (
+                                                <div className='mt-3'>
+                                                    <span className='flex border-b border-black'>Anexos salvos.</span>
+                                                    {anexosSalvos.map(anexo => (
+                                                        <div key={anexo.id} className="flex items-center justify-between p-2 border-b">
+
+                                                            <span>
+                                                                {anexo.originalFilename}
+                                                            </span>
+                                                            <div>
+
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <a href={anexo.url} target="_blank" rel="noopener noreferrer" download>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                            >
+                                                                                <FileDown className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </a>
+
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent side="right" align="center" className="ml-2">
+                                                                        <span>Download</span>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            onClick={() => removeAnexosSalvos(anexo.id ?? "")}
+                                                                        >
+                                                                            <Trash2 className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent side="right" align="center" className="ml-2">
+                                                                        <span>Remover</span>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </div>
+
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )
+                                        }
                                     </div>
+                                    <Button type="button" onClick={handleSaveUploads}>Salvar upload(s)</Button>
                                 </div>
                             </DialogContent>
                         </Dialog>
