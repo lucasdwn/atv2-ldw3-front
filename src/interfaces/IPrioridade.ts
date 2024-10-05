@@ -6,5 +6,5 @@ export interface IPrioridade {
     nome: string;
     criadoEm?: Date;
     atualizadoEm?: Date;
-    personalizacao?: IPersonalizacao;
+    personalizacao: IPersonalizacao;
 }

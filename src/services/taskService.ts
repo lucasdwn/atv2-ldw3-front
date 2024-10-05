@@ -3,6 +3,7 @@ import { IAnexo, IResponseAnexo } from '@/interfaces/IAnexo';
 import { apiService } from './apiService';
 import { IOrdenacao, IRealizadoEm, ITarefa } from '@/interfaces/ITarefa';
 import { FORMERR } from 'dns';
+import { IPrioridade } from '@/interfaces/IPrioridade';
 
 export const taskService = {
     async atualizarOrdenacao(listaId: string, ordenacao: IOrdenacao[]): Promise<ITarefa> {
@@ -72,4 +73,31 @@ export const taskService = {
             body: formData,
         });
     },
+
+    async buscarPrioridade(prioridadeId: string): Promise<IPrioridade> {
+        return await apiService.makeRequest(`/prioridade/findOne/${prioridadeId}`, {
+            method: 'GET',
+        });
+    },
+
+    async createPrioridade(prioridade: IPrioridade): Promise<IPrioridade> {
+        return await apiService.makeRequest('/prioridade/', {
+            method: 'POST',
+            body: JSON.stringify(prioridade),
+        });
+    },
+
+    async updatePrioridade(prioridadeId: string, prioridade: IPrioridade): Promise<IPrioridade> {
+        return await apiService.makeRequest(`/prioridade/update/${prioridadeId}`, {
+            method: 'PUT',
+            body: JSON.stringify(prioridade),
+        });
+    },
+
+    async deletePrioridade(prioridadeId: string): Promise<IPrioridade> {
+        return await apiService.makeRequest(`/tipoLista/delete/${prioridadeId}`, {
+            method: 'DELETE',
+        });
+    },
+
 };
