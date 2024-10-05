@@ -29,6 +29,7 @@ interface TarefaFormProps {
     tarefaId?: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL_PRODUCAO;
 
 export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
     const { toast } = useToast();
@@ -555,7 +556,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
 
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
-                                                                        <a href={anexo.url} target="_blank" rel="noopener noreferrer" download>
+                                                                        <a href={`${API_URL}${anexo.url}`} target="_blank" rel="noopener noreferrer" download>
                                                                             <Button
                                                                                 variant="ghost"
                                                                                 size="icon"

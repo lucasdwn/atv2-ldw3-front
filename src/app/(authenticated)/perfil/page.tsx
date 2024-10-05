@@ -19,7 +19,7 @@ interface User {
     criadoEm?: Date;
     atualizadoEm?: Date;
 }
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL_PRODUCAO;
 export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [userData, setUserData] = useState<User>({
@@ -174,7 +174,7 @@ export default function ProfilePage() {
                                             {profileImage && isEditing ? (
                                                 <AvatarImage src={URL.createObjectURL(profileImage)} alt="Profile picture" />
                                             ) : (
-                                                <AvatarImage src={userData.profileImage} alt="Profile picture" />
+                                                <AvatarImage src={`${API_URL}${userData.profileImage}`} alt="Profile picture" />
                                             )}
                                             <AvatarFallback>{getInitials(userData.nome)}</AvatarFallback>
                                         </Avatar>
