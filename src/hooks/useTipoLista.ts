@@ -4,7 +4,7 @@ import { apiService } from '@/services/apiService';
 import { useToast } from './use-toast';
 import { ITipoLista } from '@/interfaces/ITipoLista';
 
-const useTipoLista = (page: number, limit: number) => {
+const useTipoLista = (page: number, limit: number, search: string) => {
     const [tiposLista, setTiposLista] = useState<ITipoLista[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -14,7 +14,7 @@ const useTipoLista = (page: number, limit: number) => {
     const fetchTiposLista = async () => {
         setLoading(true);
         try {
-            const response = await apiService.makeRequest(`/tipoLista/listAll?page=${page}&limit=${limit}`, {
+            const response = await apiService.makeRequest(`/tipoLista/listAll?page=${page}&limit=${limit}&search=${search}`, {
                 method: 'GET',
             });
             setTiposLista(response.tiposLista);
@@ -32,7 +32,7 @@ const useTipoLista = (page: number, limit: number) => {
 
     useEffect(() => {
         fetchTiposLista();
-    }, [page, limit]);
+    }, [page, limit, search]);
 
     return { tiposLista, total, loading, error, refetch: fetchTiposLista };
 };

@@ -19,6 +19,8 @@ import {
     AlertDialogCancel
 } from "@/components/ui/alert-dialog";
 import { listService } from "@/services/listService";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 
 const tiposListas: React.FC = () => {
@@ -26,12 +28,13 @@ const tiposListas: React.FC = () => {
     const itemsPerPage = 10;
     const [currentPage, setCurrentPage] = useState<number>(1);
     const router = useRouter();
-    const { tiposLista, total, loading, error, refetch } = useTipoLista(currentPage, itemsPerPage);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [tipoListaToDelete, setTipoListaToDelete] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const { tiposLista, total, loading, error, refetch } = useTipoLista(currentPage, itemsPerPage, searchTerm);
 
-    if (loading) return <Loading />;
-    if (error) return <div>Error: {error}</div>;
+    // if (loading) return <Loading />;
+    // if (error) return <div>Error: {error}</div>;
 
     const totalPages = Math.ceil(total / itemsPerPage);
 
@@ -86,6 +89,15 @@ const tiposListas: React.FC = () => {
                     <ListPlus className="mr-2" />
                     Novo tipo de lista
                 </Button>
+                <div className='flex flex-col gap-2 mt-3'>
+                    <Label htmlFor="listType">Filtro</Label>
+                    <Input
+                        id="searchTipoListas"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Digite para buscar tipos de lista"
+                    />
+                </div>
             </header>
             <main>
                 {

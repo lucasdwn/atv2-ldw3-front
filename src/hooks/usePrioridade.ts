@@ -4,7 +4,7 @@ import { apiService } from '@/services/apiService';
 import { useToast } from './use-toast';
 import { IPrioridade } from '@/interfaces/IPrioridade';
 
-const usePrioridade = (page: number, limit: number) => {
+const usePrioridade = (page: number, limit: number, search: string) => {
     const [prioridades, setPrioridades] = useState<IPrioridade[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -14,7 +14,7 @@ const usePrioridade = (page: number, limit: number) => {
     const fetchPrioridades = async () => {
         setLoading(true);
         try {
-            const response = await apiService.makeRequest(`/prioridade/listAll?page=${page}&limit=${limit}`, {
+            const response = await apiService.makeRequest(`/prioridade/listAll?page=${page}&limit=${limit}&search=${search}`, {
                 method: 'GET',
             });
             setPrioridades(response.prioridades);
@@ -32,7 +32,7 @@ const usePrioridade = (page: number, limit: number) => {
 
     useEffect(() => {
         fetchPrioridades();
-    }, [page, limit]);
+    }, [page, limit, search]);
 
     return { prioridades, total, loading, error, refetch: fetchPrioridades };
 };

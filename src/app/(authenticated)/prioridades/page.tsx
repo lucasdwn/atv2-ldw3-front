@@ -22,6 +22,8 @@ import { listService } from "@/services/listService";
 import usePrioridade from "@/hooks/usePrioridade";
 import PrioridadeItem from "@/components/prioridades/prioridade-item";
 import { taskService } from "@/services/taskService";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 
 const Prioridades: React.FC = () => {
@@ -29,12 +31,13 @@ const Prioridades: React.FC = () => {
     const itemsPerPage = 10;
     const [currentPage, setCurrentPage] = useState<number>(1);
     const router = useRouter();
-    const { prioridades, total, loading, error, refetch } = usePrioridade(currentPage, itemsPerPage);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [priodadeToDelete, setPrioridadeToDelete] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const { prioridades, total, loading, error, refetch } = usePrioridade(currentPage, itemsPerPage, searchTerm);
 
-    if (loading) return <Loading />;
-    if (error) return <div>Error: {error}</div>;
+    // if (loading) return <Loading />;
+    // if (error) return <div>Error: {error}</div>;
 
     const totalPages = Math.ceil(total / itemsPerPage);
 
@@ -89,6 +92,15 @@ const Prioridades: React.FC = () => {
                     <ListPlus className="mr-2" />
                     Nova Prioridade
                 </Button>
+                <div className='flex flex-col gap-2 mt-3'>
+                    <Label htmlFor="listType">Filtro</Label>
+                    <Input
+                        id="searchPrioridades"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Digite para buscar prioridades"
+                    />
+                </div>
             </header>
             <main>
                 {
