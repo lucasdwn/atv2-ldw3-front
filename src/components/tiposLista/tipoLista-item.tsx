@@ -15,14 +15,9 @@ export default function TipoListaItem({ tipoLista, onDelete }: TipoListaItemProp
     const { icone, cor } = personalizacao || { icone: '', cor: '' };
     const router = useRouter();
 
-    const handleItemClick = () => {
-        router.push(`lista/${tipoLista.id}`);
-    };
-
     return (
         <div
-            className="flex flex-col md:flex-row items-center justify-between p-4 bg-white dark:bg-[#1E1E1E] hover:bg-gray-300 dark:hover:bg-gray-700 rounded-lg shadow-md border border-gray-200 mb-4 cursor-pointer"
-            onClick={handleItemClick}
+            className="flex flex-col md:flex-row items-center justify-between p-4 bg-white dark:bg-[#1E1E1E] rounded-lg shadow-md border border-gray-200 mb-4"
         >
             <div className="flex items-center space-x-4 mb-2 md:mb-0">
                 <div className="flex items-center space-x-2">
@@ -40,7 +35,7 @@ export default function TipoListaItem({ tipoLista, onDelete }: TipoListaItemProp
                                 size="icon"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    router.push(`editar/${tipoLista.id}`);
+                                    router.push(`tiposDeListas/${tipoLista.id}`);
                                 }}
                             >
                                 <SquarePen className="h-4 w-4" />

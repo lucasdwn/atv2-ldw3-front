@@ -31,7 +31,7 @@ export default function VisualizarLista() {
     const { listaId } = useParams() as { listaId: string };
     const [nome, setNome] = useState<string>('');
     const [personalizacao, setPersonalizacao] = useState<{ icone: string; cor: string }>({ icone: '📝', cor: '#3B82F6' });
-    const [tipoLista, setTipoLista] = useState<ITipoLista>({ nome: '' });
+    const [tipoLista, setTipoLista] = useState<ITipoLista>({ nome: '', personalizacao: { icone: '', cor: '' } });
     const { toast } = useToast();
     const router = useRouter();
     const { tarefas: initialTarefas, loading, refetch } = useTarefa(listaId);

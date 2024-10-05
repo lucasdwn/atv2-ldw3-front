@@ -1,6 +1,7 @@
 'use client';
 import { apiService } from './apiService';
 import { ILista } from '../interfaces/ILista';
+import { ITipoLista } from '@/interfaces/ITipoLista';
 
 export const listService = {
     async createLista(lista: ILista): Promise<ILista> {
@@ -39,4 +40,31 @@ export const listService = {
             method: 'DELETE',
         });
     },
+
+    async buscarTipoLista(tipoListaId: string): Promise<ITipoLista> {
+        return await apiService.makeRequest(`/tipoLista/findOne/${tipoListaId}`, {
+            method: 'GET',
+        });
+    },
+
+    async createTipoLista(tipoLista: ITipoLista): Promise<ITipoLista> {
+        return await apiService.makeRequest('/tipoLista/', {
+            method: 'POST',
+            body: JSON.stringify(tipoLista),
+        });
+    },
+
+    async updateTipoLista(tipoListaId: string, tipoLista: ITipoLista): Promise<ITipoLista> {
+        return await apiService.makeRequest(`/tipoLista/update/${tipoListaId}`, {
+            method: 'PUT',
+            body: JSON.stringify(tipoLista),
+        });
+    },
+
+    async deleteTipoLista(tipoListaId: string): Promise<ITipoLista> {
+        return await apiService.makeRequest(`/tipoLista/delete/${tipoListaId}`, {
+            method: 'DELETE',
+        });
+    },
+
 };

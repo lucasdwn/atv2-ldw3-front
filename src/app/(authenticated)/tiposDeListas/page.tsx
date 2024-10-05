@@ -18,6 +18,7 @@ import {
     AlertDialogAction,
     AlertDialogCancel
 } from "@/components/ui/alert-dialog";
+import { listService } from "@/services/listService";
 
 
 const tiposListas: React.FC = () => {
@@ -60,28 +61,28 @@ const tiposListas: React.FC = () => {
     };
 
     const handleDelete = async (tipoListaId: string) => {
-        // try {
-        //     await listService.deleteLista(listaId);
-        //     toast({
-        //         title: "Sucesso",
-        //         description: "Lista removida com sucesso!",
-        //         variant: "default",
-        //     });
-        //     refetch();
-        // } catch (error: any) {
-        //     toast({
-        //         title: `${error.message}`,
-        //         description: `${error.error}`,
-        //         variant: "destructive",
-        //     });
-        // }
+        try {
+            await listService.deleteTipoLista(tipoListaId);
+            toast({
+                title: "Sucesso",
+                description: "Tipo de Lista removido com sucesso!",
+                variant: "default",
+            });
+            refetch();
+        } catch (error: any) {
+            toast({
+                title: `${error.message}`,
+                description: `${error.error}`,
+                variant: "destructive",
+            });
+        }
     };
 
     return (
         <>
             <header className='mb-3'>
                 <h1 className="text-4xl font-bold mb-3">Tipos de lista</h1>
-                <Button onClick={() => console.log('novo tipo de lista')}>
+                <Button onClick={() => router.push('tiposDeListas/novoTipoDeLista')}>
                     <ListPlus className="mr-2" />
                     Novo tipo de lista
                 </Button>
