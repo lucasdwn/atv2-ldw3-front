@@ -17,6 +17,7 @@ export interface ITarefa {
     realizadoEm?: Date;
     criadoEm?: Date;
     atualizadoEm?: Date;
+    isPermitidoEditar?: boolean;
 }
 
 export interface ISubTarefa {

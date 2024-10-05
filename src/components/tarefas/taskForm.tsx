@@ -60,6 +60,8 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
     // Constantes uitilizadas para definir states de rota
     const [isEditing, setIsEditing] = useState<boolean>(!!tarefaId);
 
+    // Contantes para permissoes de usuario.
+    const [isPermitidoEditar, setIsPermitidoEditar] = useState<boolean>(false);
 
 
 
@@ -173,9 +175,8 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                     const tarefa = await taskService.buscarTarefa(listaId, tarefaId);
                     setTitulo(tarefa.titulo);
                     setDescricao(tarefa.descricao);
-
                     setDataDeVencimento(dateService.formatDateForInput(tarefa.dataDeVencimento.toString()));
-
+                    setIsPermitidoEditar(tarefa.isPermitidoEditar ?? false);
                     if (tarefa.realizadoEm) {
                         setRealizadoEm(dateService.formatDateForInput(tarefa.realizadoEm.toString()));
                     }
@@ -185,6 +186,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                     if (tarefa.anexos) {
                         setAnexosSalvos(tarefa.anexos);
                     }
+
 
                     if (typeof tarefa.prioridadeId === 'string') {
                         setPrioridadeId(tarefa.prioridadeId);
@@ -316,12 +318,13 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                                 value={titulo}
                                 onChange={(e) => setTitulo(e.target.value)}
                                 placeholder="Digite o título da tarefa"
+                                disabled={!isPermitidoEditar}
                             />
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="prioridade">Prioridade</Label>
-                            <Select onValueChange={(value) => setPrioridadeId(value)} value={prioridadeId}>
+                            <Select onValueChange={(value) => setPrioridadeId(value)} value={prioridadeId} disabled={!isPermitidoEditar}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecione a prioridade" />
                                 </SelectTrigger>
@@ -351,6 +354,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                                 id="dataDeVencimento"
                                 value={dataDeVencimento}
                                 onChange={(e) => setDataDeVencimento(e.target.value)}
+                                disabled={!isPermitidoEditar}
                             />
 
                         </div>
@@ -361,6 +365,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                                 id="realizadoEm"
                                 value={realizadoEm}
                                 onChange={(e) => setRealizadoEm(e.target.value)}
+                                disabled={!isPermitidoEditar}
                             />
                         </div>
                     </div>
@@ -382,6 +387,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                             onChange={(e) => setDescricao(e.target.value)}
                             placeholder="Digite a descrição da tarefa"
                             rows={4}
+                            disabled={!isPermitidoEditar}
                         />
                     </div>
                     <div className="space-y-4">
@@ -391,67 +397,75 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                                 value={newSubTarefaTitulo}
                                 onChange={(e) => setnewSubTarefaTitulo(e.target.value)}
                                 placeholder="Título da subtarefa"
+                                disabled={!isPermitidoEditar}
                             />
                             <Input
                                 value={newSubTarefaDescricao}
                                 onChange={(e) => setNewSubTarefaDescricao(e.target.value)}
                                 placeholder="Descrição da subtarefa"
+                                disabled={!isPermitidoEditar}
                             />
-                            <Button type="button" onClick={addSubTarefa}>Adicionar</Button>
+                            <Button type="button" onClick={addSubTarefa} disabled={!isPermitidoEditar}>Adicionar</Button>
                         </div>
-                        <div className="border rounded-md p-4 max-h-60 overflow-y-auto">
-                            <DragDropContext onDragEnd={onDragEndSubTarefa}>
-                                <Droppable droppableId="subtarefas">
-                                    {(provided) => (
-                                        <ul {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
-                                            {subTarefas.map((subtarefa, index) => (
-                                                <Draggable key={subtarefa.id} draggableId={subtarefa.id ?? ""} index={index}>
-                                                    {(provided) => (
-                                                        <li
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            className="flex items-center gap-2 bg-muted p-2 rounded-md"
-                                                        >
-                                                            <span {...provided.dragHandleProps}>
-                                                                <GripVertical className="text-muted-foreground" />
-                                                            </span>
-                                                            <Checkbox
-                                                                checked={subtarefa.isFinalizada}
-                                                                onCheckedChange={(checked) => {
-                                                                    const updateSubtarefas = subTarefas.map(st =>
-                                                                        st.id === subtarefa.id ? { ...st, isFinalizada: checked === true } : st
-                                                                    )
-                                                                    setSubTarefas(updateSubtarefas)
-                                                                }}
-                                                            />
-                                                            <span className="flex-grow">{subtarefa.titulo}</span>
-                                                            <TooltipProvider>
-                                                                <Tooltip>
-                                                                    <TooltipTrigger>
-                                                                        <NotepadText className="text-muted-foreground" />
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <p>{subtarefa.descricao}</p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            </TooltipProvider>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => removeSubTarefa(subtarefa.id ?? "")}
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </li>
-                                                    )}
-                                                </Draggable>
-                                            ))}
-                                            {provided.placeholder}
-                                        </ul>
-                                    )}
-                                </Droppable>
-                            </DragDropContext>
-                        </div>
+                        {
+                            subTarefas.length > 0 && (
+                                <div className="border rounded-md p-4 max-h-60 overflow-y-auto">
+                                    <DragDropContext onDragEnd={onDragEndSubTarefa} >
+                                        <Droppable droppableId="subtarefas">
+                                            {(provided) => (
+                                                <ul {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
+                                                    {subTarefas.map((subtarefa, index) => (
+                                                        <Draggable key={subtarefa.id} draggableId={subtarefa.id ?? ""} index={index} isDragDisabled={!isPermitidoEditar}>
+                                                            {(provided) => (
+                                                                <li
+                                                                    ref={provided.innerRef}
+                                                                    {...provided.draggableProps}
+                                                                    className="flex items-center gap-2 bg-muted p-2 rounded-md"
+                                                                >
+                                                                    <span {...provided.dragHandleProps}>
+                                                                        <GripVertical className="text-muted-foreground" />
+                                                                    </span>
+                                                                    <Checkbox
+                                                                        checked={subtarefa.isFinalizada}
+                                                                        disabled={!isPermitidoEditar}
+                                                                        onCheckedChange={(checked) => {
+                                                                            const updateSubtarefas = subTarefas.map(st =>
+                                                                                st.id === subtarefa.id ? { ...st, isFinalizada: checked === true } : st
+                                                                            )
+                                                                            setSubTarefas(updateSubtarefas)
+                                                                        }}
+                                                                    />
+                                                                    <span className="flex-grow">{subtarefa.titulo}</span>
+                                                                    <TooltipProvider>
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger>
+                                                                                <NotepadText className="text-muted-foreground" />
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent>
+                                                                                <p>{subtarefa.descricao}</p>
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
+                                                                    </TooltipProvider>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => removeSubTarefa(subtarefa.id ?? "")}
+                                                                        disabled={!isPermitidoEditar}
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </li>
+                                                            )}
+                                                        </Draggable>
+                                                    ))}
+                                                    {provided.placeholder}
+                                                </ul>
+                                            )}
+                                        </Droppable>
+                                    </DragDropContext>
+                                </div>
+                            )
+                        }
                     </div>
                     <div>
                         <Dialog>
@@ -470,6 +484,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                                         type="file"
                                         onChange={handleFileUpload}
                                         ref={inputRef}
+                                        disabled={!isPermitidoEditar}
                                         multiple
                                     />
                                     <div className="max-h-[200px] overflow-y-auto">
@@ -489,6 +504,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                                                                         variant="ghost"
                                                                         size="icon"
                                                                         onClick={() => removeAttachment(anexo.id ?? "")}
+                                                                        disabled={!isPermitidoEditar}
                                                                     >
                                                                         <Trash2 className="h-4 w-4" />
                                                                     </Button>
@@ -537,6 +553,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                                                                             variant="ghost"
                                                                             size="icon"
                                                                             onClick={() => removeAnexosSalvos(anexo.id ?? "")}
+                                                                            disabled={!isPermitidoEditar}
                                                                         >
                                                                             <Trash2 className="h-4 w-4" />
                                                                         </Button>
@@ -553,7 +570,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                                             )
                                         }
                                     </div>
-                                    <Button type="button" onClick={handleSaveUploads}>Salvar upload(s)</Button>
+                                    <Button type="button" onClick={handleSaveUploads} disabled={!isPermitidoEditar} >Salvar upload(s)</Button>
                                 </div>
                             </DialogContent>
                         </Dialog>
@@ -561,7 +578,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                 </CardContent>
                 <CardFooter className="flex justify-between">
                     <Button variant="outline" type="button" onClick={() => router.back()}>Voltar</Button>
-                    <Button onClick={handleSubmit} type="submit">{isEditing ? 'Atualizar' : 'Salvar'}</Button>
+                    <Button onClick={handleSubmit} type="submit" disabled={!isPermitidoEditar}>{isEditing ? 'Atualizar' : 'Salvar'}</Button>
                 </CardFooter>
             </form>
         </Card>
