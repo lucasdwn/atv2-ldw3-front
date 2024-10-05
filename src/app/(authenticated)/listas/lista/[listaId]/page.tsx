@@ -233,7 +233,7 @@ export default function VisualizarLista() {
                         id="searchPrioridades"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Digite para buscar listas"
+                        placeholder="Digite para buscar tarefas"
                     />
                 </div>
                 <div className="space-y-2">
