@@ -173,7 +173,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
     }
 
     const removeAnexosSalvos = (id: string) => {
-        setAnexosSalvos(anexos.filter(anexo => anexo.id !== id));
+        setAnexosSalvos(anexosSalvos.filter(anexo => anexo.id !== id));
     }
 
     useEffect(() => {
