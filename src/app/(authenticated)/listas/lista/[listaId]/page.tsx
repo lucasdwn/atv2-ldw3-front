@@ -165,7 +165,8 @@ export default function VisualizarLista() {
         refetch();
     }, []);
 
-    if (!listaId && loading) return <Loading />;
+    if (!listaId) return <Loading />;
+    if (loading) return <Loading />;
 
     return (
         <div>

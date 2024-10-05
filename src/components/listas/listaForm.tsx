@@ -15,6 +15,7 @@ import { EmojiPickerComponent } from '@/components/emojiPicker';
 import { IUsuarioPermitido } from '@/interfaces/IUsuario';
 import { Checkbox } from '../ui/checkbox';
 import { CheckedState } from '@radix-ui/react-checkbox';
+import Loading from '../loading';
 
 interface ListaFormProps {
     listaId?: string;
@@ -33,6 +34,7 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
     const router = useRouter();
     const { toast } = useToast();
     const [isEditingUsers, setIsEditingUsers] = useState<boolean>(false);
+    const [isFetching, setIsFetching] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchTipoListas = async () => {
@@ -54,6 +56,7 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
     useEffect(() => {
         if (isEditing && listaId) {
             const fetchLista = async () => {
+                setIsFetching(true)
                 try {
                     const lista = await listService.buscarLista(listaId);
                     setNome(lista.nome);
@@ -71,6 +74,9 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
                         description: `${error.error}`,
                         variant: "destructive",
                     });
+                }
+                finally {
+                    setIsFetching(false);
                 }
             };
             fetchLista();
@@ -139,6 +145,8 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
             });
         }
     };
+
+    if (isFetching) return <Loading />;
 
     return (
         <Card className="w-full max-w-2xl mx-auto">
