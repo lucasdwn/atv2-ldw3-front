@@ -26,6 +26,10 @@ import {
     AlertDialogAction,
     AlertDialogCancel
 } from "@/components/ui/alert-dialog";
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { IPrioridade } from '@/interfaces/IPrioridade';
 
 export default function VisualizarLista() {
     const { listaId } = useParams() as { listaId: string };
@@ -34,17 +38,38 @@ export default function VisualizarLista() {
     const [tipoLista, setTipoLista] = useState<ITipoLista>({ nome: '', personalizacao: { icone: '', cor: '' } });
     const { toast } = useToast();
     const router = useRouter();
-    const { tarefas: initialTarefas, loading, refetch } = useTarefa(listaId);
     const [tarefas, setTarefas] = useState<ITarefa[]>([]);
     const [isPermitidoEditar, setIsPermitidoEditar] = useState<boolean>(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [searchTermPrioridade, setSearchTermPrioridade] = useState<string>('');
+    const [prioridadeId, setPrioridadeId] = useState<string>('');
+    const [prioridades, setPrioridades] = useState<IPrioridade[]>([]);
+    const { tarefas: initialTarefas, loading, refetch } = useTarefa(listaId, searchTerm, prioridadeId);
 
     useEffect(() => {
         if (initialTarefas) {
             setTarefas(initialTarefas);
         }
     }, [initialTarefas]);
+
+    useEffect(() => {
+        const fetchPrioridades = async () => {
+            try {
+                const idTarefa = '';
+                const prioridades = await taskService.getPrioridades(idTarefa, searchTerm);
+                setPrioridades(prioridades);
+            } catch (error: any) {
+                toast({
+                    title: `${error.message}`,
+                    description: `${error.error}`,
+                    variant: "destructive",
+                });
+            }
+        };
+        fetchPrioridades();
+    }, [searchTermPrioridade]);
 
     const onDragEnd = async (result: any) => {
         if (!result.destination) {
@@ -166,7 +191,7 @@ export default function VisualizarLista() {
     }, []);
 
     if (!listaId) return <Loading />;
-    if (loading) return <Loading />;
+    // if (loading) return <Loading />;
 
     return (
         <div>
@@ -202,6 +227,45 @@ export default function VisualizarLista() {
                         </div>
                     )
                 }
+                <div className='flex flex-col gap-2 mt-3'>
+                    <Label htmlFor="listType">Filtro</Label>
+                    <Input
+                        id="searchPrioridades"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Digite para buscar listas"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="listType">Prioridade</Label>
+                    <Select onValueChange={(value) => setPrioridadeId(value)} value={prioridadeId}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecione a prioridade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <Input
+                                id="searchTipoListas"
+                                value={searchTermPrioridade}
+                                onChange={(e) => setSearchTermPrioridade(e.target.value)}
+                                placeholder="Digite para buscar prioridades"
+                            />
+                            <SelectItem value="a">
+                                <span className="flex items-center">
+                                    Todos
+                                </span>
+                            </SelectItem>
+                            {prioridades.map(prioridade => (
+                                <SelectItem key={prioridade.id} value={prioridade.id ?? ""}>
+                                    <span className="flex items-center">
+                                        <span className="mr-2">{prioridade.personalizacao?.icone}</span>
+                                        <span className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: prioridade.personalizacao?.cor }}></span>
+                                        {prioridade.nome}
+                                    </span>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </header>
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="droppable">

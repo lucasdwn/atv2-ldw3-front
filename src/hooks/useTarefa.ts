@@ -4,7 +4,7 @@ import { apiService } from '@/services/apiService';
 import { useToast } from './use-toast';
 import { ITarefa } from '@/interfaces/ITarefa';
 
-const useTarefa = (listaId: string) => {
+const useTarefa = (listaId: string, search: string, prioridadeId: string) => {
     const [tarefas, setTarefas] = useState<ITarefa[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const { toast } = useToast();
@@ -12,7 +12,7 @@ const useTarefa = (listaId: string) => {
     const fetchTarefas = async () => {
         setLoading(true);
         try {
-            const response = await apiService.makeRequest(`/tarefa/getTarefas?listaId=${listaId}`, {
+            const response = await apiService.makeRequest(`/tarefa/getTarefas?listaId=${listaId}&search=${search}&prioridadeId=${prioridadeId}`, {
                 method: 'GET',
             });
             setTarefas(response.tarefas);
@@ -26,6 +26,11 @@ const useTarefa = (listaId: string) => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchTarefas();
+    }, [search, prioridadeId]);
+
 
     return { tarefas, loading, refetch: fetchTarefas };
 };
