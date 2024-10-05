@@ -517,10 +517,9 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                                                     <span className='flex border-b border-black'>Anexos pendentes.</span>
                                                     {anexos.map(anexo => (
                                                         <div key={anexo.id} className="flex items-center justify-between p-2 border-b">
-                                                            <a href={anexo.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                                                            <span>
                                                                 {anexo.originalFilename}
-                                                            </a>
-
+                                                            </span>
                                                             <Tooltip>
                                                                 <TooltipTrigger asChild>
                                                                     <Button
@@ -556,7 +555,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
 
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
-                                                                        <a href={`${API_URL}${anexo.url}`} target="_blank" rel="noopener noreferrer" download>
+                                                                        <a href={anexo.url} target="_blank" rel="noopener noreferrer" download>
                                                                             <Button
                                                                                 variant="ghost"
                                                                                 size="icon"

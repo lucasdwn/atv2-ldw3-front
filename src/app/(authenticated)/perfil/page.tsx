@@ -174,7 +174,7 @@ export default function ProfilePage() {
                                             {profileImage && isEditing ? (
                                                 <AvatarImage src={URL.createObjectURL(profileImage)} alt="Profile picture" />
                                             ) : (
-                                                <AvatarImage src={`${API_URL}${userData.profileImage}`} alt="Profile picture" />
+                                                <AvatarImage src={userData.profileImage} alt="Profile picture" />
                                             )}
                                             <AvatarFallback>{getInitials(userData.nome)}</AvatarFallback>
                                         </Avatar>
