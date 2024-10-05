@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ListPlus, CircleChevronLeft, CircleChevronRight } from "lucide-react";
 import { ListItem } from '@/components/listas/list-item';
@@ -18,7 +18,11 @@ import {
     AlertDialogDescription,
     AlertDialogAction,
     AlertDialogCancel
-} from "@/components/ui/alert-dialog"; 
+} from "@/components/ui/alert-dialog";
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { ITipoLista } from '@/interfaces/ITipoLista';
 
 interface ListagemProps {
     title: string;
@@ -29,14 +33,36 @@ interface ListagemProps {
 const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
     const itemsPerPage = 10;
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const { listas, total, loading, error, refetch } = useLista(currentPage, itemsPerPage, fetchUrl);
     const router = useRouter();
     const { toast } = useToast();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [listToDelete, setListToDelete] = useState<string | null>(null); 
+    const [listToDelete, setListToDelete] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [searchTermTipoLista, setSearchTermTipoLista] = useState<string>('');
+    const [tipoListaId, setTipoListaId] = useState<string>('');
+    const { listas, total, loading, error, refetch } = useLista(currentPage, itemsPerPage, fetchUrl, searchTerm, tipoListaId);
+    const [tipoListas, setTipoListas] = useState<ITipoLista[]>([]);
 
-    if (loading) return <Loading />;
-    if (error) return <div>Error: {error}</div>;
+    useEffect(() => {
+        const fetchTipoListas = async () => {
+            try {
+                const idLista = '';
+                const tipos = await listService.getTipoListas(idLista, searchTermTipoLista);
+                setTipoListas(tipos);
+            } catch (error: any) {
+                toast({
+                    title: `${error.message}`,
+                    description: `${error.error}`,
+                    variant: "destructive",
+                });
+            }
+        };
+        fetchTipoListas();
+    }, [searchTermTipoLista]);
+
+
+    // if (loading) return <Loading />;
+    // if (error) return <div>Error: {error}</div>;
 
     const totalPages = Math.ceil(total / itemsPerPage);
 
@@ -97,6 +123,45 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
                         Nova lista
                     </Button>
                 )}
+                <div className='flex flex-col gap-2 mt-3'>
+                    <Label htmlFor="listType">Filtro</Label>
+                    <Input
+                        id="searchPrioridades"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Digite para buscar listas"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="listType">Tipo de Lista</Label>
+                    <Select onValueChange={(value) => setTipoListaId(value)} value={tipoListaId}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo de lista" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <Input
+                                id="searchTipoListas"
+                                value={searchTermTipoLista}
+                                onChange={(e) => setSearchTermTipoLista(e.target.value)}
+                                placeholder="Digite para buscar tipos de lista"
+                            />
+                            <SelectItem value="0">
+                                <span className="flex items-center">
+                                    Todos
+                                </span>
+                            </SelectItem>
+                            {tipoListas.map(tipo => (
+                                <SelectItem key={tipo.id} value={tipo.id ?? ""}>
+                                    <span className="flex items-center">
+                                        <span className="mr-2">{tipo.personalizacao?.icone}</span>
+                                        <span className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: tipo.personalizacao?.cor }}></span>
+                                        {tipo.nome}
+                                    </span>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </header>
             <main>
                 {listas && listas.length > 0 ? (
@@ -108,7 +173,7 @@ const Listagem: React.FC<ListagemProps> = ({ fetchUrl, title, IsShared }) => {
                                     lista={lista}
                                     tipoLista={lista.tipoListaId}
                                     IsShared={IsShared}
-                                    onDelete={() => openDialog(lista.id ?? "")} 
+                                    onDelete={() => openDialog(lista.id ?? "")}
                                 />
                             ))}
                         </div>

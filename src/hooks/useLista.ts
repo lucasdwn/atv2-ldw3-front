@@ -4,7 +4,7 @@ import { apiService } from '@/services/apiService';
 import { ILista } from '@/interfaces/ILista';
 import { useToast } from './use-toast';
 
-const useLista = (page: number, limit: number, fetchUrl: string) => {
+const useLista = (page: number, limit: number, fetchUrl: string, search: string, tipoListaId: string) => {
     const [listas, setListas] = useState<ILista[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -14,7 +14,7 @@ const useLista = (page: number, limit: number, fetchUrl: string) => {
     const fetchListas = async () => {
         setLoading(true);
         try {
-            const response = await apiService.makeRequest(`/lista/${fetchUrl}?page=${page}&limit=${limit}`, {
+            const response = await apiService.makeRequest(`/lista/${fetchUrl}?page=${page}&limit=${limit}&search=${search}&tipoListaId=${tipoListaId}`, {
                 method: 'GET',
             });
             setListas(response.listas);
@@ -32,7 +32,7 @@ const useLista = (page: number, limit: number, fetchUrl: string) => {
 
     useEffect(() => {
         fetchListas();
-    }, [page, limit]);
+    }, [page, limit, search, tipoListaId]);
 
     return { listas, total, loading, error, refetch: fetchListas };
 };
