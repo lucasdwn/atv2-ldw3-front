@@ -160,7 +160,6 @@ export default function Navbar({ onNavbarToggle }: { onNavbarToggle: (isOpen: bo
                                     <Button
                                         variant="ghost" className={`w-full justify-start hidden lg:flex ${isOpen ? 'w-full justify-start flex' : 'lg:w-auto lg:items-center lg:justify-center'} `}
                                         onClick={() => routePush('/tiposDeListas')}
-                                        disabled
                                     >
                                         <FileType className="mr-2" />
                                         {isOpen && <span>Tipos de lista</span>}
