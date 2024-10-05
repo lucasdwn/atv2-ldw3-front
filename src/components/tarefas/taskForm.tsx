@@ -64,8 +64,10 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
     // Contantes para permissoes de usuario.
     const [isPermitidoEditar, setIsPermitidoEditar] = useState<boolean>(true);
 
-    // Implementando loaddings 
+    // Implementando loadings 
     const [isFetching, setIsFetching] = useState<boolean>(false);
+    const [isSubmit, setIsSubmit] = useState<boolean>(false);
+    const [isSubmitUploads, setIsSubmitUploads] = useState<boolean>(false);
 
 
 
@@ -216,6 +218,7 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        setIsSubmit(true);
         try {
 
             const novaTarefa: ITarefa = {
@@ -259,6 +262,9 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                 variant: "destructive",
             });
         }
+        finally {
+            setIsSubmit(false);
+        }
     }
 
     const handleSaveUploads = async () => {
@@ -270,6 +276,8 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
             });
             return;
         }
+
+        setIsSubmitUploads(true);
 
         const files: File[] = [];
 
@@ -312,6 +320,9 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                 description: `${error.error}`,
                 variant: "destructive",
             });
+        }
+        finally {
+            setIsSubmitUploads(false);
         }
     };
 
@@ -581,7 +592,8 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                                             )
                                         }
                                     </div>
-                                    <Button type="button" onClick={handleSaveUploads} disabled={!isPermitidoEditar} >Salvar upload(s)</Button>
+
+                                    <Button type="button" onClick={handleSaveUploads} disabled={!isPermitidoEditar ? true : (isSubmitUploads ? true : false)} >{isSubmitUploads ? 'Salvando...' : 'Salvar upload(s)'}</Button>
                                 </div>
                             </DialogContent>
                         </Dialog>
@@ -589,9 +601,14 @@ export const TaskForm: React.FC<TarefaFormProps> = ({ tarefaId }) => {
                 </CardContent>
                 <CardFooter className="flex justify-between">
                     <Button variant="outline" type="button" onClick={() => router.back()}>Voltar</Button>
-                    <Button onClick={handleSubmit} type="submit" disabled={!isPermitidoEditar}>{isEditing ? 'Atualizar' : 'Salvar'}</Button>
+                    <Button onClick={handleSubmit} type="submit" disabled={!isPermitidoEditar ? true : (isSubmit ? true : false)}>
+                        {isSubmit ?
+                            (isEditing ? 'Atualizando...' : 'Salvando...') :
+                            (isEditing ? 'Atualizar' : 'Salvar')
+                        }
+                    </Button>
                 </CardFooter>
             </form>
-        </Card>
+        </Card >
     )
 }

@@ -22,6 +22,7 @@ export default function RegisterPage() {
     const router = useRouter();
     const { register } = useAuth();
     const { toast } = useToast();
+    const [isSubmit, setIsSubmit] = useState<boolean>(false);
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -39,6 +40,7 @@ export default function RegisterPage() {
             return;
         }
 
+        setIsSubmit(true);
         try {
             await register(nome, email, password);
             toast({
@@ -53,6 +55,9 @@ export default function RegisterPage() {
                 description: `${error.error}`,
                 variant: "destructive",
             });
+        }
+        finally {
+            setIsSubmit(false);
         }
     };
 
@@ -165,8 +170,8 @@ export default function RegisterPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <Button type="submit" className="w-full bg-violet-purple hover:bg-violet-purple-hover dark:text-gray-100">
-                                        Cadastrar
+                                    <Button type="submit" className="w-full bg-violet-purple hover:bg-violet-purple-hover dark:text-gray-100" disabled={isSubmit}>
+                                        {isSubmit ? 'Cadastrando...' : 'Cadastrar'}
                                     </Button>
                                 </div>
                             </form>

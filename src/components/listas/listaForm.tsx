@@ -35,6 +35,8 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
     const { toast } = useToast();
     const [isEditingUsers, setIsEditingUsers] = useState<boolean>(false);
     const [isFetching, setIsFetching] = useState<boolean>(false);
+    const [isSubmit, setIsSubmit] = useState<boolean>(false);
+
 
     useEffect(() => {
         const fetchTipoListas = async () => {
@@ -109,6 +111,7 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
     };
 
     const handleSubmit = async () => {
+        setIsSubmit(true);
         try {
             const novaLista: ILista = {
                 nome,
@@ -144,6 +147,10 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
                 variant: "destructive",
             });
         }
+        finally {
+            setIsSubmit(false);
+        }
+
     };
 
     if (isFetching) return <Loading />;
@@ -268,7 +275,12 @@ export const ListaForm: React.FC<ListaFormProps> = ({ listaId }) => {
             </CardContent>
             <CardFooter className="flex justify-between">
                 <Button variant="outline" onClick={() => router.back()}>Voltar</Button>
-                <Button onClick={handleSubmit}>{isEditing ? 'Atualizar' : 'Salvar'}</Button>
+                <Button onClick={handleSubmit} disabled={isSubmit}>
+                    {isSubmit ?
+                        (isEditing ? 'Atualizando...' : 'Salvando...') :
+                        (isEditing ? 'Atualizar' : 'Salvar')
+                    }
+                </Button>
             </CardFooter>
         </Card>
     );

@@ -21,6 +21,7 @@ export default function LoginPage() {
     const router = useRouter();
     const { login } = useAuth();
     const { toast } = useToast();
+    const [isSubmit, setIsSubmit] = useState<boolean>(false);
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -28,6 +29,7 @@ export default function LoginPage() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSubmit(true);
         try {
             await login(email, password);
             toast({
@@ -42,6 +44,9 @@ export default function LoginPage() {
                 description: `${error.error}`,
                 variant: "destructive",
             });
+        }
+        finally {
+            setIsSubmit(false);
         }
     };
 
@@ -122,8 +127,8 @@ export default function LoginPage() {
                                 </div>
 
                                 <div>
-                                    <Button type="submit" className="w-full bg-violet-purple hover:bg-violet-purple-hover dark:text-gray-100">
-                                        Entrar
+                                    <Button type="submit" className="w-full bg-violet-purple hover:bg-violet-purple-hover dark:text-gray-100" disabled={isSubmit}>
+                                        {isSubmit ? 'Entrando...' : 'Entrar'}
                                     </Button>
                                 </div>
                             </form>
