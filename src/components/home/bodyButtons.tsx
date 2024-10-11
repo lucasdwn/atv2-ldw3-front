@@ -8,7 +8,7 @@ export function BodyButtons() {
     const router = useRouter();
 
     const handleWatchClick = () => {
-        window.open("https://youtu.be/CLVGwIY8FI8?si=hObgmrQO4bhFrUWx", "_blank", "noopener,noreferrer");
+        window.open("https://youtu.be/7EGj-Smv1WI", "_blank", "noopener,noreferrer");
     };
 
     return (
